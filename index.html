@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Маркетинговая аналитика недвижимости</title>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+:root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --ink: #263445;
+    --muted: #788493;
+    --line: #e7ebef;
+    --teal: #18a999;
+    --navy: #253b50;
+    --orange: #e69b52;
+    --blue: #6d91c7;
+    --red: #e26d6d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.page {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 25px;
+}
+
+.subtitle {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.badge {
+    background: #e8f5f3;
+    color: #167c70;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 11px;
+}
+
+.card,
+.panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(25, 42, 62, 0.05);
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.control label {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+select,
+input,
+button {
+    width: 100%;
+    font: inherit;
+}
+
+select,
+input {
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+    color: var(--ink);
+    padding: 8px 10px;
+}
+
+select[multiple] {
+    height: 92px;
+    padding: 5px;
+}
+
+.help {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+.actions {
+    display: flex;
+    align-items: end;
+}
+
+button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 12px;
+    cursor: pointer;
+    background: var(--navy);
+    color: white;
+    font-weight: 600;
+}
+
+button.secondary {
+    background: #edf1f4;
+    color: var(--ink);
+}
+
+button:hover {
+    opacity: 0.88;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.kpi {
+    min-height: 105px;
+    padding: 16px;
+}
+
+.kpi-label {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.kpi-value {
+    margin-top: 12px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 12px;
+}
+
+.grid-three {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.panel {
+    min-width: 0;
+    padding: 12px;
+}
+
+.chart-title {
+    margin: 3px 4px 0;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.chart-note {
+    margin: 4px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.chart {
+    width: 100%;
+    height: 290px;
+}
+
+.table-panel {
+    margin-top: 14px;
+    padding: 16px;
+}
+
+.table-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.table-head h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.table-actions {
+    display: flex;
+    width: 280px;
+    gap: 8px;
+}
+
+.table-wrap {
+    max-height: 430px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    min-width: 1150px;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th,
+td {
+    border-bottom: 1px solid var(--line);
+    padding: 8px;
+    white-space: nowrap;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f7f9fa;
+    color: var(--muted);
+    text-align: left;
+}
+
+td input {
+    min-width: 95px;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 6px;
+}
+
+td input:focus {
+    border-color: #9dcac4;
+    background: white;
+    outline: none;
+}
+
+.pager {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.pager button {
+    width: 90px;
+}
+
+.footer {
+    color: var(--muted);
+    font-size: 11px;
+    padding: 14px 2px;
+}
+
+@media (max-width: 1000px) {
+    .kpis {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid,
+    .grid-three {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .page {
+        padding: 12px;
+    }
+
+    .header {
+        display: block;
+    }
+
+    .badge {
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+    .filters {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .kpis {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .table-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .table-actions {
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+<div class="header">
+    <div>
+        <h1>Маркетинговая аналитика жилой недвижимости</h1>
+        <div class="subtitle">Эффективность каналов, расходы и маркетинговая воронка</div>
+    </div>
+    <div class="badge">Учебный проект · синтетические данные</div>
+</div>
+
+<section class="card filters">
+    <div class="control">
+        <label>Месяцы — можно выбрать несколько</label>
+        <select id="monthFilter" multiple></select>
+        <div class="help">Пустой выбор означает весь год</div>
+    </div>
+
+    <div class="control">
+        <label>Жилые комплексы — несколько значений</label>
+        <select id="projectFilter" multiple></select>
+        <div class="help">Ctrl / Command + клик</div>
+    </div>
+
+    <div class="control">
+        <label>Каналы — несколько значений</label>
+        <select id="channelFilter" multiple></select>
+        <div class="help">Пустой выбор означает все каналы</div>
+    </div>
+
+    <div class="actions">
+        <button class="secondary" onclick="resetFilters()">Сбросить фильтры</button>
+    </div>
+</section>
+
+<section id="kpis" class="kpis"></section>
+
+<section class="grid">
+    <div class="panel">
+        <div class="chart-title">Расходы и обращения по месяцам</div>
+        <div class="chart-note">Динамика маркетингового бюджета и объёма лидов</div>
+        <div id="trendChart" class="chart"></div>
+    </div>
+
+    <div class="panel">
+        <div class="chart-title">Обращения и сделки по каналам</div>
+        <div class="chart-note">Сравнение объёма потока и итогового результата</div>
+        <div id="channelChart" class="chart"></div>
+    </div>
+</section>
+
+<section class="grid-three">
+    <div class="panel">
+        <div class="chart-title">Стоимость привлечения и сделки</div>
+        <div class="chart-note">CPL и стоимость сделки по каналам</div>
+        <div id="costChart" class="chart"></div>
+    </div>
+
+    <div class="panel">
+        <div class="chart-title">Маркетинговая воронка</div>
+        <div class="chart-note">Суммарно по выбранным данным</div>
+        <div id="funnelChart" class="chart"></div>
+    </div>
+
+    <div class="panel">
+        <div class="chart-title">ROMI по каналам</div>
+        <div class="chart-note">Прибыль от продаж минус расход / расход</div>
+        <div id="romiChart" class="chart"></div>
+    </div>
+</section>
+
+<section class="card table-panel">
+    <div class="table-head">
+        <div>
+            <h2>Редактирование маркетинговых данных</h2>
+            <div class="chart-note">
+                Измените расход или показатели кампании — графики пересчитаются автоматически.
+            </div>
+        </div>
+        <div class="table-actions">
+            <button class="secondary" onclick="addRow()">Добавить запись</button>
+            <button onclick="downloadCSV()">Скачать CSV</button>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Месяц</th>
+                    <th>ЖК</th>
+                    <th>Канал</th>
+                    <th>Кампания</th>
+                    <th>Расходы</th>
+                    <th>Лиды</th>
+                    <th>Квалифицированные</th>
+                    <th>Встречи</th>
+                    <th>Брони</th>
+                    <th>Сделки</th>
+                    <th>Выручка</th>
+                </tr>
+            </thead>
+            <tbody id="dataTable"></tbody>
+        </table>
+    </div>
+
+    <div class="pager">
+        <button class="secondary" onclick="changePage(-1)">Назад</button>
+        <span id="pageLabel"></span>
+        <button class="secondary" onclick="changePage(1)">Далее</button>
+    </div>
+</section>
+
+<div class="footer">
+    Дашборд содержит только синтетические данные. Изменения сохраняются в браузере до обновления страницы.
+</div>
+
+</div>
+
+<script>
+const rows = [{"Month": "2025-01", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 518624, "Leads": 216, "Qualified_leads": 119, "Meetings": 44, "Reservations": 13, "Deals": 3, "Revenue": 28649754, "CPL": 2401.037037037037, "Cost_per_deal": 172874.66666666666, "ROMI": 54.241859227494295}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 696727, "Leads": 304, "Qualified_leads": 148, "Meetings": 59, "Reservations": 16, "Deals": 5, "Revenue": 40051605, "CPL": 2291.8651315789475, "Cost_per_deal": 139345.4, "ROMI": 56.48536370773632}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 258829, "Leads": 117, "Qualified_leads": 45, "Meetings": 14, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2212.2136752136753, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 447680, "Leads": 183, "Qualified_leads": 74, "Meetings": 20, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 2446.3387978142077, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 438008, "Leads": 174, "Qualified_leads": 66, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 13849437, "CPL": 2517.287356321839, "Cost_per_deal": 438008.0, "ROMI": 30.61914165951307}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 495866, "Leads": 160, "Qualified_leads": 101, "Meetings": 47, "Reservations": 19, "Deals": 6, "Revenue": 58365474, "CPL": 3099.1625, "Cost_per_deal": 82644.33333333333, "ROMI": 116.7041257113817}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 500068, "Leads": 164, "Qualified_leads": 104, "Meetings": 45, "Reservations": 15, "Deals": 4, "Revenue": 34366588, "CPL": 3049.1951219512193, "Cost_per_deal": 125017.0, "ROMI": 67.72382955917995}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 73468, "Leads": 70, "Qualified_leads": 43, "Meetings": 22, "Reservations": 10, "Deals": 4, "Revenue": 35164452, "CPL": 1049.5428571428572, "Cost_per_deal": 18367.0, "ROMI": 477.63630424130235}, {"Month": "2025-01", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 345885, "Leads": 134, "Qualified_leads": 58, "Meetings": 20, "Reservations": 6, "Deals": 1, "Revenue": 8424184, "CPL": 2581.231343283582, "Cost_per_deal": 345885.0, "ROMI": 23.355447619873658}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 603941, "Leads": 242, "Qualified_leads": 114, "Meetings": 39, "Reservations": 13, "Deals": 3, "Revenue": 39731283, "CPL": 2495.623966942149, "Cost_per_deal": 201313.66666666666, "ROMI": 64.78669605143548}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 626410, "Leads": 259, "Qualified_leads": 123, "Meetings": 49, "Reservations": 14, "Deals": 4, "Revenue": 39707844, "CPL": 2418.5714285714284, "Cost_per_deal": 156602.5, "ROMI": 62.38954358966172}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 213511, "Leads": 121, "Qualified_leads": 51, "Meetings": 19, "Reservations": 4, "Deals": 1, "Revenue": 12071264, "CPL": 1764.5537190082644, "Cost_per_deal": 213511.0, "ROMI": 55.53696530857895}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 331924, "Leads": 164, "Qualified_leads": 64, "Meetings": 18, "Reservations": 5, "Deals": 1, "Revenue": 9717826, "CPL": 2023.9268292682927, "Cost_per_deal": 331924.0, "ROMI": 28.27726226485581}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 421042, "Leads": 172, "Qualified_leads": 63, "Meetings": 18, "Reservations": 4, "Deals": 1, "Revenue": 8709326, "CPL": 2447.9186046511627, "Cost_per_deal": 421042.0, "ROMI": 19.685171550581654}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 445894, "Leads": 120, "Qualified_leads": 63, "Meetings": 32, "Reservations": 10, "Deals": 3, "Revenue": 29889762, "CPL": 3715.7833333333333, "Cost_per_deal": 148631.33333333334, "ROMI": 66.03333527699408}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 484192, "Leads": 138, "Qualified_leads": 76, "Meetings": 34, "Reservations": 11, "Deals": 4, "Revenue": 31991056, "CPL": 3508.6376811594205, "Cost_per_deal": 121048.0, "ROMI": 65.07101315180755}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 65284, "Leads": 51, "Qualified_leads": 31, "Meetings": 18, "Reservations": 7, "Deals": 3, "Revenue": 27403818, "CPL": 1280.078431372549, "Cost_per_deal": 21761.333333333332, "ROMI": 418.7631578947368}, {"Month": "2025-01", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 293010, "Leads": 76, "Qualified_leads": 33, "Meetings": 10, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3855.3947368421054, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 455958, "Leads": 168, "Qualified_leads": 88, "Meetings": 31, "Reservations": 10, "Deals": 3, "Revenue": 22273419, "CPL": 2714.035714285714, "Cost_per_deal": 151986.0, "ROMI": 47.849716421249326}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 409476, "Leads": 191, "Qualified_leads": 97, "Meetings": 33, "Reservations": 11, "Deals": 4, "Revenue": 38106376, "CPL": 2143.8534031413615, "Cost_per_deal": 102369.0, "ROMI": 92.06131739100704}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 197472, "Leads": 97, "Qualified_leads": 41, "Meetings": 14, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2035.7938144329896, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 340897, "Leads": 142, "Qualified_leads": 59, "Meetings": 17, "Reservations": 4, "Deals": 1, "Revenue": 9963229, "CPL": 2400.6830985915494, "Cost_per_deal": 340897.0, "ROMI": 28.226508300161047}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 316821, "Leads": 189, "Qualified_leads": 83, "Meetings": 25, "Reservations": 6, "Deals": 1, "Revenue": 8837863, "CPL": 1676.3015873015872, "Cost_per_deal": 316821.0, "ROMI": 26.895445693309473}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 466753, "Leads": 108, "Qualified_leads": 62, "Meetings": 28, "Reservations": 10, "Deals": 3, "Revenue": 30716307, "CPL": 4321.787037037037, "Cost_per_deal": 155584.33333333334, "ROMI": 64.80848328773463}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 457570, "Leads": 147, "Qualified_leads": 87, "Meetings": 43, "Reservations": 15, "Deals": 5, "Revenue": 51579855, "CPL": 3112.721088435374, "Cost_per_deal": 91514.0, "ROMI": 111.72560482549117}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 72566, "Leads": 70, "Qualified_leads": 42, "Meetings": 21, "Reservations": 10, "Deals": 3, "Revenue": 36949092, "CPL": 1036.6571428571428, "Cost_per_deal": 24188.666666666668, "ROMI": 508.17911969793016}, {"Month": "2025-01", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 239077, "Leads": 82, "Qualified_leads": 42, "Meetings": 14, "Reservations": 4, "Deals": 1, "Revenue": 7555132, "CPL": 2915.5731707317073, "Cost_per_deal": 239077.0, "ROMI": 30.60124980654768}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 511315, "Leads": 157, "Qualified_leads": 86, "Meetings": 35, "Reservations": 11, "Deals": 3, "Revenue": 26470266, "CPL": 3256.7834394904457, "Cost_per_deal": 170438.33333333334, "ROMI": 50.768999540400735}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 472211, "Leads": 164, "Qualified_leads": 85, "Meetings": 30, "Reservations": 10, "Deals": 3, "Revenue": 26545788, "CPL": 2879.3353658536585, "Cost_per_deal": 157403.66666666666, "ROMI": 55.21594583777168}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 240249, "Leads": 154, "Qualified_leads": 72, "Meetings": 25, "Reservations": 7, "Deals": 1, "Revenue": 13439296, "CPL": 1560.0584415584415, "Cost_per_deal": 240249.0, "ROMI": 54.93902992312143}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 283991, "Leads": 125, "Qualified_leads": 53, "Meetings": 15, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2271.928, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 381165, "Leads": 162, "Qualified_leads": 66, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 8270802, "CPL": 2352.8703703703704, "Cost_per_deal": 381165.0, "ROMI": 20.698744638148835}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 467954, "Leads": 155, "Qualified_leads": 94, "Meetings": 42, "Reservations": 16, "Deals": 6, "Revenue": 79293330, "CPL": 3019.058064516129, "Cost_per_deal": 77992.33333333333, "ROMI": 168.44684733969578}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 400927, "Leads": 137, "Qualified_leads": 75, "Meetings": 35, "Reservations": 12, "Deals": 4, "Revenue": 31446164, "CPL": 2926.4744525547444, "Cost_per_deal": 100231.75, "ROMI": 77.43364003920914}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 83397, "Leads": 77, "Qualified_leads": 44, "Meetings": 24, "Reservations": 10, "Deals": 4, "Revenue": 51519844, "CPL": 1083.077922077922, "Cost_per_deal": 20849.25, "ROMI": 616.7661546578414}, {"Month": "2025-01", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 296075, "Leads": 80, "Qualified_leads": 35, "Meetings": 11, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3700.9375, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 656781, "Leads": 249, "Qualified_leads": 119, "Meetings": 45, "Reservations": 15, "Deals": 4, "Revenue": 58353784, "CPL": 2637.6746987951806, "Cost_per_deal": 164195.25, "ROMI": 87.84816095471702}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 685777, "Leads": 279, "Qualified_leads": 120, "Meetings": 44, "Reservations": 12, "Deals": 4, "Revenue": 43793656, "CPL": 2457.9820788530465, "Cost_per_deal": 171444.25, "ROMI": 62.859907812597974}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 208777, "Leads": 115, "Qualified_leads": 53, "Meetings": 17, "Reservations": 4, "Deals": 1, "Revenue": 7333796, "CPL": 1815.4521739130435, "Cost_per_deal": 208777.0, "ROMI": 34.12741346029495}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 428332, "Leads": 224, "Qualified_leads": 81, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 14568389, "CPL": 1912.1964285714287, "Cost_per_deal": 428332.0, "ROMI": 33.011908986487114}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 449044, "Leads": 255, "Qualified_leads": 101, "Meetings": 29, "Reservations": 8, "Deals": 2, "Revenue": 18686904, "CPL": 1760.956862745098, "Cost_per_deal": 224522.0, "ROMI": 40.61486179528064}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 444831, "Leads": 144, "Qualified_leads": 86, "Meetings": 39, "Reservations": 13, "Deals": 5, "Revenue": 46279610, "CPL": 3089.1041666666665, "Cost_per_deal": 88966.2, "ROMI": 103.03863489729808}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 550809, "Leads": 198, "Qualified_leads": 100, "Meetings": 48, "Reservations": 18, "Deals": 5, "Revenue": 49186565, "CPL": 2781.8636363636365, "Cost_per_deal": 110161.8, "ROMI": 88.29876781243588}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 73629, "Leads": 60, "Qualified_leads": 38, "Meetings": 18, "Reservations": 7, "Deals": 3, "Revenue": 25794603, "CPL": 1227.15, "Cost_per_deal": 24543.0, "ROMI": 349.33211098887665}, {"Month": "2025-02", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 354072, "Leads": 99, "Qualified_leads": 51, "Meetings": 19, "Reservations": 6, "Deals": 1, "Revenue": 6972830, "CPL": 3576.4848484848485, "Cost_per_deal": 354072.0, "ROMI": 18.69325447931494}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 595928, "Leads": 179, "Qualified_leads": 92, "Meetings": 32, "Reservations": 9, "Deals": 3, "Revenue": 35947713, "CPL": 3329.2067039106146, "Cost_per_deal": 198642.66666666666, "ROMI": 59.32224194869179}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 585333, "Leads": 259, "Qualified_leads": 134, "Meetings": 48, "Reservations": 13, "Deals": 4, "Revenue": 27968684, "CPL": 2259.972972972973, "Cost_per_deal": 146333.25, "ROMI": 46.78251696043107}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 227207, "Leads": 107, "Qualified_leads": 48, "Meetings": 17, "Reservations": 4, "Deals": 1, "Revenue": 7875356, "CPL": 2123.429906542056, "Cost_per_deal": 227207.0, "ROMI": 33.66159053198185}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 342445, "Leads": 178, "Qualified_leads": 63, "Meetings": 17, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 1923.8483146067415, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 312131, "Leads": 129, "Qualified_leads": 52, "Meetings": 14, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2419.6201550387595, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 536431, "Leads": 170, "Qualified_leads": 89, "Meetings": 40, "Reservations": 14, "Deals": 4, "Revenue": 29899248, "CPL": 3155.4764705882353, "Cost_per_deal": 134107.75, "ROMI": 54.737360443374826}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 536486, "Leads": 169, "Qualified_leads": 88, "Meetings": 45, "Reservations": 18, "Deals": 5, "Revenue": 48187520, "CPL": 3174.473372781065, "Cost_per_deal": 107297.2, "ROMI": 88.82064769630522}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 83587, "Leads": 66, "Qualified_leads": 40, "Meetings": 22, "Reservations": 8, "Deals": 3, "Revenue": 38741112, "CPL": 1266.469696969697, "Cost_per_deal": 27862.333333333332, "ROMI": 462.4825032600763}, {"Month": "2025-02", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 267907, "Leads": 93, "Qualified_leads": 49, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 7971435, "CPL": 2880.7204301075267, "Cost_per_deal": 267907.0, "ROMI": 28.75448569839534}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 435084, "Leads": 155, "Qualified_leads": 69, "Meetings": 25, "Reservations": 8, "Deals": 2, "Revenue": 19592924, "CPL": 2806.993548387097, "Cost_per_deal": 217542.0, "ROMI": 44.03250866499343}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 586541, "Leads": 200, "Qualified_leads": 110, "Meetings": 37, "Reservations": 11, "Deals": 2, "Revenue": 24729696, "CPL": 2932.705, "Cost_per_deal": 293270.5, "ROMI": 41.161922184467926}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 190825, "Leads": 104, "Qualified_leads": 40, "Meetings": 13, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 1834.8557692307693, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 318954, "Leads": 117, "Qualified_leads": 42, "Meetings": 13, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2726.102564102564, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 345402, "Leads": 158, "Qualified_leads": 66, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 8217887, "CPL": 2186.0886075949365, "Cost_per_deal": 345402.0, "ROMI": 22.792239187960696}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 456281, "Leads": 120, "Qualified_leads": 73, "Meetings": 37, "Reservations": 12, "Deals": 3, "Revenue": 23803833, "CPL": 3802.3416666666667, "Cost_per_deal": 152093.66666666666, "ROMI": 51.16924000780221}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 469026, "Leads": 130, "Qualified_leads": 66, "Meetings": 31, "Reservations": 12, "Deals": 3, "Revenue": 35398842, "CPL": 3607.892307692308, "Cost_per_deal": 156342.0, "ROMI": 74.47309104399329}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 67290, "Leads": 64, "Qualified_leads": 42, "Meetings": 22, "Reservations": 9, "Deals": 3, "Revenue": 25451427, "CPL": 1051.40625, "Cost_per_deal": 22430.0, "ROMI": 377.23490860454746}, {"Month": "2025-02", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 258944, "Leads": 83, "Qualified_leads": 35, "Meetings": 12, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3119.8072289156626, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 614601, "Leads": 177, "Qualified_leads": 87, "Meetings": 33, "Reservations": 10, "Deals": 3, "Revenue": 35886003, "CPL": 3472.322033898305, "Cost_per_deal": 204867.0, "ROMI": 57.38910610298389}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 541338, "Leads": 166, "Qualified_leads": 83, "Meetings": 32, "Reservations": 9, "Deals": 3, "Revenue": 32662815, "CPL": 3261.0722891566265, "Cost_per_deal": 180446.0, "ROMI": 59.33719229021425}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 205241, "Leads": 135, "Qualified_leads": 60, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 8196353, "CPL": 1520.3037037037036, "Cost_per_deal": 205241.0, "ROMI": 38.93526147309748}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 348688, "Leads": 160, "Qualified_leads": 59, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 9769593, "CPL": 2179.3, "Cost_per_deal": 348688.0, "ROMI": 27.018150897077042}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 320217, "Leads": 180, "Qualified_leads": 82, "Meetings": 27, "Reservations": 7, "Deals": 2, "Revenue": 16646654, "CPL": 1778.9833333333333, "Cost_per_deal": 160108.5, "ROMI": 50.985541054972096}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 473284, "Leads": 145, "Qualified_leads": 87, "Meetings": 37, "Reservations": 13, "Deals": 4, "Revenue": 43312564, "CPL": 3264.0275862068966, "Cost_per_deal": 118321.0, "ROMI": 90.51495507982523}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 431011, "Leads": 160, "Qualified_leads": 94, "Meetings": 41, "Reservations": 13, "Deals": 4, "Revenue": 47741932, "CPL": 2693.81875, "Cost_per_deal": 107752.75, "ROMI": 109.76731684342163}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 83535, "Leads": 55, "Qualified_leads": 33, "Meetings": 19, "Reservations": 9, "Deals": 4, "Revenue": 50119804, "CPL": 1518.8181818181818, "Cost_per_deal": 20883.75, "ROMI": 598.9856826479919}, {"Month": "2025-02", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 307096, "Leads": 92, "Qualified_leads": 45, "Meetings": 15, "Reservations": 4, "Deals": 1, "Revenue": 14556545, "CPL": 3338.0, "Cost_per_deal": 307096.0, "ROMI": 46.4006336780681}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 555820, "Leads": 234, "Qualified_leads": 110, "Meetings": 41, "Reservations": 11, "Deals": 3, "Revenue": 39079980, "CPL": 2375.2991452991455, "Cost_per_deal": 185273.33333333334, "ROMI": 69.31049620380699}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 655621, "Leads": 202, "Qualified_leads": 112, "Meetings": 44, "Reservations": 15, "Deals": 5, "Revenue": 38413880, "CPL": 3245.6485148514853, "Cost_per_deal": 131124.2, "ROMI": 57.591594839091485}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 296668, "Leads": 144, "Qualified_leads": 62, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 9885862, "CPL": 2060.1944444444443, "Cost_per_deal": 296668.0, "ROMI": 32.32298057087384}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 348842, "Leads": 190, "Qualified_leads": 71, "Meetings": 23, "Reservations": 5, "Deals": 1, "Revenue": 14745076, "CPL": 1836.0105263157895, "Cost_per_deal": 348842.0, "ROMI": 41.26863737738002}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 434102, "Leads": 166, "Qualified_leads": 72, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 7339176, "CPL": 2615.0722891566265, "Cost_per_deal": 434102.0, "ROMI": 15.906570345218405}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 470523, "Leads": 149, "Qualified_leads": 74, "Meetings": 36, "Reservations": 12, "Deals": 4, "Revenue": 48803656, "CPL": 3157.8724832214766, "Cost_per_deal": 117630.75, "ROMI": 102.7221474826948}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 463088, "Leads": 124, "Qualified_leads": 69, "Meetings": 33, "Reservations": 13, "Deals": 5, "Revenue": 37233735, "CPL": 3734.5806451612902, "Cost_per_deal": 92617.6, "ROMI": 79.40315231662233}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 101061, "Leads": 72, "Qualified_leads": 49, "Meetings": 25, "Reservations": 11, "Deals": 4, "Revenue": 45466312, "CPL": 1403.625, "Cost_per_deal": 25265.25, "ROMI": 448.88978933515403}, {"Month": "2025-03", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 296438, "Leads": 115, "Qualified_leads": 47, "Meetings": 15, "Reservations": 4, "Deals": 1, "Revenue": 10418093, "CPL": 2577.721739130435, "Cost_per_deal": 296438.0, "ROMI": 34.14425613450367}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 580361, "Leads": 166, "Qualified_leads": 89, "Meetings": 35, "Reservations": 11, "Deals": 3, "Revenue": 41699367, "CPL": 3496.1506024096384, "Cost_per_deal": 193453.66666666666, "ROMI": 70.85073945354702}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 528185, "Leads": 186, "Qualified_leads": 100, "Meetings": 41, "Reservations": 12, "Deals": 4, "Revenue": 53220024, "CPL": 2839.7043010752686, "Cost_per_deal": 132046.25, "ROMI": 99.76019576474152}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 212380, "Leads": 134, "Qualified_leads": 54, "Meetings": 17, "Reservations": 4, "Deals": 1, "Revenue": 12805219, "CPL": 1584.9253731343283, "Cost_per_deal": 212380.0, "ROMI": 59.29390243902439}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 355292, "Leads": 166, "Qualified_leads": 69, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 11534884, "CPL": 2140.3132530120483, "Cost_per_deal": 355292.0, "ROMI": 31.46592661810567}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 336928, "Leads": 168, "Qualified_leads": 63, "Meetings": 21, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 2005.5238095238096, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 561319, "Leads": 143, "Qualified_leads": 77, "Meetings": 38, "Reservations": 14, "Deals": 4, "Revenue": 35455804, "CPL": 3925.3076923076924, "Cost_per_deal": 140329.75, "ROMI": 62.16515920537164}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 525089, "Leads": 142, "Qualified_leads": 71, "Meetings": 30, "Reservations": 12, "Deals": 4, "Revenue": 54469676, "CPL": 3697.8098591549297, "Cost_per_deal": 131272.25, "ROMI": 102.73417839642423}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 75032, "Leads": 55, "Qualified_leads": 32, "Meetings": 16, "Reservations": 6, "Deals": 2, "Revenue": 14645700, "CPL": 1364.2181818181818, "Cost_per_deal": 37516.0, "ROMI": 194.19271777374988}, {"Month": "2025-03", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 293828, "Leads": 115, "Qualified_leads": 59, "Meetings": 22, "Reservations": 7, "Deals": 1, "Revenue": 8627581, "CPL": 2555.026086956522, "Cost_per_deal": 293828.0, "ROMI": 28.362691778863827}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 503758, "Leads": 178, "Qualified_leads": 85, "Meetings": 33, "Reservations": 9, "Deals": 2, "Revenue": 24043780, "CPL": 2830.1011235955057, "Cost_per_deal": 251879.0, "ROMI": 46.728830112871655}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 470943, "Leads": 166, "Qualified_leads": 88, "Meetings": 35, "Reservations": 12, "Deals": 3, "Revenue": 20849190, "CPL": 2837.0060240963853, "Cost_per_deal": 156981.0, "ROMI": 43.27115383390347}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 236640, "Leads": 153, "Qualified_leads": 58, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 7926206, "CPL": 1546.6666666666667, "Cost_per_deal": 236640.0, "ROMI": 32.494785327924276}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 341227, "Leads": 152, "Qualified_leads": 63, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 13656272, "CPL": 2244.9144736842104, "Cost_per_deal": 341227.0, "ROMI": 39.021076878441626}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 311320, "Leads": 179, "Qualified_leads": 63, "Meetings": 17, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 1739.217877094972, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 451640, "Leads": 146, "Qualified_leads": 87, "Meetings": 45, "Reservations": 14, "Deals": 5, "Revenue": 40417005, "CPL": 3093.4246575342468, "Cost_per_deal": 90328.0, "ROMI": 88.48942742006908}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 364060, "Leads": 116, "Qualified_leads": 57, "Meetings": 24, "Reservations": 9, "Deals": 3, "Revenue": 35242740, "CPL": 3138.448275862069, "Cost_per_deal": 121353.33333333333, "ROMI": 95.80475745756193}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 76179, "Leads": 51, "Qualified_leads": 30, "Meetings": 15, "Reservations": 6, "Deals": 2, "Revenue": 15969818, "CPL": 1493.7058823529412, "Cost_per_deal": 38089.5, "ROMI": 208.63543758778667}, {"Month": "2025-03", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 272787, "Leads": 91, "Qualified_leads": 42, "Meetings": 14, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2997.6593406593406, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 538327, "Leads": 209, "Qualified_leads": 105, "Meetings": 35, "Reservations": 11, "Deals": 3, "Revenue": 43116198, "CPL": 2575.7272727272725, "Cost_per_deal": 179442.33333333334, "ROMI": 79.0929509387417}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 567480, "Leads": 171, "Qualified_leads": 95, "Meetings": 36, "Reservations": 12, "Deals": 3, "Revenue": 27016473, "CPL": 3318.59649122807, "Cost_per_deal": 189160.0, "ROMI": 46.6077976316346}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 251931, "Leads": 162, "Qualified_leads": 69, "Meetings": 25, "Reservations": 6, "Deals": 1, "Revenue": 8563347, "CPL": 1555.1296296296296, "Cost_per_deal": 251931.0, "ROMI": 32.9908427307477}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 365463, "Leads": 160, "Qualified_leads": 69, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 9892474, "CPL": 2284.14375, "Cost_per_deal": 365463.0, "ROMI": 26.068332498775526}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 384574, "Leads": 211, "Qualified_leads": 83, "Meetings": 24, "Reservations": 5, "Deals": 1, "Revenue": 11567756, "CPL": 1822.6255924170616, "Cost_per_deal": 384574.0, "ROMI": 29.07940214367066}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 412801, "Leads": 129, "Qualified_leads": 75, "Meetings": 37, "Reservations": 14, "Deals": 6, "Revenue": 78026436, "CPL": 3200.0077519379847, "Cost_per_deal": 68800.16666666667, "ROMI": 188.01707117957562}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 443413, "Leads": 112, "Qualified_leads": 60, "Meetings": 28, "Reservations": 9, "Deals": 3, "Revenue": 25737639, "CPL": 3959.0446428571427, "Cost_per_deal": 147804.33333333334, "ROMI": 57.04439427802072}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 85750, "Leads": 65, "Qualified_leads": 40, "Meetings": 19, "Reservations": 8, "Deals": 2, "Revenue": 17061446, "CPL": 1319.2307692307693, "Cost_per_deal": 42875.0, "ROMI": 197.9673002915452}, {"Month": "2025-03", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 281687, "Leads": 74, "Qualified_leads": 38, "Meetings": 12, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3806.5810810810813, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 598434, "Leads": 213, "Qualified_leads": 104, "Meetings": 38, "Reservations": 11, "Deals": 3, "Revenue": 33244749, "CPL": 2809.549295774648, "Cost_per_deal": 199478.0, "ROMI": 54.5529080901152}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 700767, "Leads": 271, "Qualified_leads": 126, "Meetings": 51, "Reservations": 15, "Deals": 4, "Revenue": 46350504, "CPL": 2585.8560885608854, "Cost_per_deal": 175191.75, "ROMI": 65.1425323966454}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 240992, "Leads": 149, "Qualified_leads": 64, "Meetings": 21, "Reservations": 6, "Deals": 1, "Revenue": 7213285, "CPL": 1617.3959731543623, "Cost_per_deal": 240992.0, "ROMI": 28.93163673482937}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 454117, "Leads": 198, "Qualified_leads": 83, "Meetings": 25, "Reservations": 7, "Deals": 1, "Revenue": 8718684, "CPL": 2293.520202020202, "Cost_per_deal": 454117.0, "ROMI": 18.199201967774826}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 376356, "Leads": 197, "Qualified_leads": 78, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 13977640, "CPL": 1910.4365482233502, "Cost_per_deal": 376356.0, "ROMI": 36.13941055808862}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 474464, "Leads": 119, "Qualified_leads": 66, "Meetings": 31, "Reservations": 10, "Deals": 4, "Revenue": 37621032, "CPL": 3987.09243697479, "Cost_per_deal": 118616.0, "ROMI": 78.29164699534633}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 584202, "Leads": 161, "Qualified_leads": 83, "Meetings": 39, "Reservations": 16, "Deals": 6, "Revenue": 61786038, "CPL": 3628.583850931677, "Cost_per_deal": 97367.0, "ROMI": 104.76142841003626}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 93376, "Leads": 68, "Qualified_leads": 44, "Meetings": 21, "Reservations": 9, "Deals": 3, "Revenue": 25918686, "CPL": 1373.1764705882354, "Cost_per_deal": 31125.333333333332, "ROMI": 276.57331648389305}, {"Month": "2025-04", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 314941, "Leads": 110, "Qualified_leads": 49, "Meetings": 17, "Reservations": 4, "Deals": 1, "Revenue": 8639999, "CPL": 2863.1, "Cost_per_deal": 314941.0, "ROMI": 26.433706630765762}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 598138, "Leads": 260, "Qualified_leads": 116, "Meetings": 47, "Reservations": 14, "Deals": 4, "Revenue": 49793280, "CPL": 2300.5307692307692, "Cost_per_deal": 149534.5, "ROMI": 82.24714363574961}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 564933, "Leads": 201, "Qualified_leads": 110, "Meetings": 43, "Reservations": 13, "Deals": 3, "Revenue": 26477976, "CPL": 2810.6119402985073, "Cost_per_deal": 188311.0, "ROMI": 45.86923228064213}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 266074, "Leads": 116, "Qualified_leads": 55, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 8010231, "CPL": 2293.7413793103447, "Cost_per_deal": 266074.0, "ROMI": 29.105275224185753}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 371244, "Leads": 158, "Qualified_leads": 71, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 12465829, "CPL": 2349.6455696202534, "Cost_per_deal": 371244.0, "ROMI": 32.57853325575632}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 367563, "Leads": 147, "Qualified_leads": 60, "Meetings": 18, "Reservations": 4, "Deals": 1, "Revenue": 10296774, "CPL": 2500.4285714285716, "Cost_per_deal": 367563.0, "ROMI": 27.01363031643555}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 480215, "Leads": 158, "Qualified_leads": 98, "Meetings": 46, "Reservations": 14, "Deals": 5, "Revenue": 67511355, "CPL": 3039.3354430379745, "Cost_per_deal": 96043.0, "ROMI": 139.5856855783347}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 504876, "Leads": 170, "Qualified_leads": 85, "Meetings": 41, "Reservations": 13, "Deals": 4, "Revenue": 34085984, "CPL": 2969.858823529412, "Cost_per_deal": 126219.0, "ROMI": 66.51357561064499}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 91037, "Leads": 84, "Qualified_leads": 58, "Meetings": 33, "Reservations": 16, "Deals": 6, "Revenue": 53588682, "CPL": 1083.7738095238096, "Cost_per_deal": 15172.833333333334, "ROMI": 587.6472752836759}, {"Month": "2025-04", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 297269, "Leads": 101, "Qualified_leads": 51, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 12932099, "CPL": 2943.2574257425745, "Cost_per_deal": 297269.0, "ROMI": 42.503019151004644}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 620438, "Leads": 234, "Qualified_leads": 103, "Meetings": 36, "Reservations": 12, "Deals": 4, "Revenue": 46211384, "CPL": 2651.4444444444443, "Cost_per_deal": 155109.5, "ROMI": 73.48187248363253}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 558012, "Leads": 217, "Qualified_leads": 117, "Meetings": 43, "Reservations": 13, "Deals": 4, "Revenue": 39961624, "CPL": 2571.483870967742, "Cost_per_deal": 139503.0, "ROMI": 70.61427352816786}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 238403, "Leads": 141, "Qualified_leads": 55, "Meetings": 20, "Reservations": 4, "Deals": 1, "Revenue": 9581680, "CPL": 1690.8014184397164, "Cost_per_deal": 238403.0, "ROMI": 39.19110497770582}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 293624, "Leads": 155, "Qualified_leads": 68, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 11200761, "CPL": 1894.348387096774, "Cost_per_deal": 293624.0, "ROMI": 37.14661267471324}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 336481, "Leads": 193, "Qualified_leads": 75, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 8498467, "CPL": 1743.4248704663212, "Cost_per_deal": 336481.0, "ROMI": 24.25690009242721}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 491104, "Leads": 137, "Qualified_leads": 76, "Meetings": 37, "Reservations": 15, "Deals": 5, "Revenue": 54057770, "CPL": 3584.700729927007, "Cost_per_deal": 98220.8, "ROMI": 109.07397618427053}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 453923, "Leads": 160, "Qualified_leads": 94, "Meetings": 40, "Reservations": 13, "Deals": 5, "Revenue": 34757185, "CPL": 2837.01875, "Cost_per_deal": 90784.6, "ROMI": 75.57066286572832}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 76903, "Leads": 71, "Qualified_leads": 49, "Meetings": 26, "Reservations": 12, "Deals": 4, "Revenue": 43479488, "CPL": 1083.1408450704225, "Cost_per_deal": 19225.75, "ROMI": 564.3809084170969}, {"Month": "2025-04", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 247488, "Leads": 74, "Qualified_leads": 34, "Meetings": 11, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3344.4324324324325, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 505848, "Leads": 209, "Qualified_leads": 109, "Meetings": 42, "Reservations": 13, "Deals": 4, "Revenue": 38772708, "CPL": 2420.3253588516745, "Cost_per_deal": 126462.0, "ROMI": 75.64893011339375}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 655296, "Leads": 308, "Qualified_leads": 159, "Meetings": 58, "Reservations": 18, "Deals": 6, "Revenue": 59790762, "CPL": 2127.5844155844156, "Cost_per_deal": 109216.0, "ROMI": 90.24237291239379}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 237840, "Leads": 130, "Qualified_leads": 61, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 11425893, "CPL": 1829.5384615384614, "Cost_per_deal": 237840.0, "ROMI": 47.04024974772957}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 386720, "Leads": 141, "Qualified_leads": 51, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 8811095, "CPL": 2742.695035460993, "Cost_per_deal": 386720.0, "ROMI": 21.784172010757135}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 301389, "Leads": 147, "Qualified_leads": 56, "Meetings": 16, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2050.265306122449, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 453179, "Leads": 151, "Qualified_leads": 88, "Meetings": 37, "Reservations": 14, "Deals": 5, "Revenue": 52627270, "CPL": 3001.1854304635763, "Cost_per_deal": 90635.8, "ROMI": 115.1291013043411}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 414434, "Leads": 125, "Qualified_leads": 66, "Meetings": 31, "Reservations": 10, "Deals": 3, "Revenue": 26406891, "CPL": 3315.472, "Cost_per_deal": 138144.66666666666, "ROMI": 62.71796474227501}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 66942, "Leads": 63, "Qualified_leads": 40, "Meetings": 21, "Reservations": 10, "Deals": 4, "Revenue": 56107460, "CPL": 1062.5714285714287, "Cost_per_deal": 16735.5, "ROMI": 837.150339099519}, {"Month": "2025-04", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 245137, "Leads": 90, "Qualified_leads": 42, "Meetings": 14, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2723.7444444444445, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 619982, "Leads": 256, "Qualified_leads": 138, "Meetings": 50, "Reservations": 17, "Deals": 5, "Revenue": 40568160, "CPL": 2421.8046875, "Cost_per_deal": 123996.4, "ROMI": 64.43441583787916}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 685765, "Leads": 311, "Qualified_leads": 149, "Meetings": 57, "Reservations": 18, "Deals": 6, "Revenue": 58317918, "CPL": 2205.032154340836, "Cost_per_deal": 114294.16666666667, "ROMI": 84.04067428346445}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 243424, "Leads": 121, "Qualified_leads": 55, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 10322998, "CPL": 2011.7685950413222, "Cost_per_deal": 243424.0, "ROMI": 41.40747830945182}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 423531, "Leads": 215, "Qualified_leads": 80, "Meetings": 26, "Reservations": 7, "Deals": 1, "Revenue": 8561744, "CPL": 1969.9116279069767, "Cost_per_deal": 423531.0, "ROMI": 19.21515308206483}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 488590, "Leads": 266, "Qualified_leads": 108, "Meetings": 35, "Reservations": 8, "Deals": 2, "Revenue": 14690414, "CPL": 1836.8045112781954, "Cost_per_deal": 244295.0, "ROMI": 29.066955934423547}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 594817, "Leads": 173, "Qualified_leads": 88, "Meetings": 46, "Reservations": 16, "Deals": 6, "Revenue": 61399458, "CPL": 3438.248554913295, "Cost_per_deal": 99136.16666666667, "ROMI": 102.22411430742565}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 574814, "Leads": 176, "Qualified_leads": 114, "Meetings": 49, "Reservations": 17, "Deals": 5, "Revenue": 36928965, "CPL": 3265.9886363636365, "Cost_per_deal": 114962.8, "ROMI": 63.24506883965944}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 96085, "Leads": 65, "Qualified_leads": 40, "Meetings": 20, "Reservations": 9, "Deals": 3, "Revenue": 36950127, "CPL": 1478.2307692307693, "Cost_per_deal": 32028.333333333332, "ROMI": 383.55666337097364}, {"Month": "2025-05", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 337977, "Leads": 114, "Qualified_leads": 51, "Meetings": 16, "Reservations": 5, "Deals": 1, "Revenue": 9488811, "CPL": 2964.7105263157896, "Cost_per_deal": 337977.0, "ROMI": 27.07531577592558}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 599302, "Leads": 196, "Qualified_leads": 101, "Meetings": 38, "Reservations": 12, "Deals": 3, "Revenue": 42497148, "CPL": 3057.6632653061224, "Cost_per_deal": 199767.33333333334, "ROMI": 69.91107321517366}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 524973, "Leads": 177, "Qualified_leads": 92, "Meetings": 32, "Reservations": 8, "Deals": 2, "Revenue": 25796648, "CPL": 2965.9491525423728, "Cost_per_deal": 262486.5, "ROMI": 48.138999529499614}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 210897, "Leads": 109, "Qualified_leads": 46, "Meetings": 15, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 1934.834862385321, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 418231, "Leads": 171, "Qualified_leads": 77, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 9439777, "CPL": 2445.7953216374267, "Cost_per_deal": 418231.0, "ROMI": 21.57072526904988}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 361160, "Leads": 169, "Qualified_leads": 70, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 9239124, "CPL": 2137.041420118343, "Cost_per_deal": 361160.0, "ROMI": 24.58180307896777}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 528441, "Leads": 182, "Qualified_leads": 93, "Meetings": 40, "Reservations": 15, "Deals": 6, "Revenue": 57392364, "CPL": 2903.521978021978, "Cost_per_deal": 88073.5, "ROMI": 107.60694760626068}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 475757, "Leads": 155, "Qualified_leads": 97, "Meetings": 43, "Reservations": 17, "Deals": 5, "Revenue": 56758785, "CPL": 3069.4, "Cost_per_deal": 95151.4, "ROMI": 118.30204915534611}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 82503, "Leads": 70, "Qualified_leads": 44, "Meetings": 23, "Reservations": 11, "Deals": 5, "Revenue": 54886030, "CPL": 1178.6142857142856, "Cost_per_deal": 16500.6, "ROMI": 664.2610208113645}, {"Month": "2025-05", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 343291, "Leads": 91, "Qualified_leads": 46, "Meetings": 18, "Reservations": 5, "Deals": 1, "Revenue": 10337085, "CPL": 3772.4285714285716, "Cost_per_deal": 343291.0, "ROMI": 29.111727368325997}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 510597, "Leads": 159, "Qualified_leads": 78, "Meetings": 32, "Reservations": 10, "Deals": 3, "Revenue": 29734980, "CPL": 3211.301886792453, "Cost_per_deal": 170199.0, "ROMI": 57.235712313233336}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 556918, "Leads": 173, "Qualified_leads": 75, "Meetings": 30, "Reservations": 8, "Deals": 2, "Revenue": 26895336, "CPL": 3219.1791907514453, "Cost_per_deal": 278459.0, "ROMI": 47.293170628351035}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 200062, "Leads": 103, "Qualified_leads": 47, "Meetings": 15, "Reservations": 4, "Deals": 1, "Revenue": 8076330, "CPL": 1942.3495145631068, "Cost_per_deal": 200062.0, "ROMI": 39.36913556797393}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 359566, "Leads": 166, "Qualified_leads": 72, "Meetings": 21, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 2166.0602409638554, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 383187, "Leads": 159, "Qualified_leads": 72, "Meetings": 23, "Reservations": 6, "Deals": 1, "Revenue": 7177149, "CPL": 2409.9811320754716, "Cost_per_deal": 383187.0, "ROMI": 17.730147421493943}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 506462, "Leads": 175, "Qualified_leads": 92, "Meetings": 44, "Reservations": 14, "Deals": 5, "Revenue": 68592755, "CPL": 2894.0685714285714, "Cost_per_deal": 101292.4, "ROMI": 134.43514617088746}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 529714, "Leads": 190, "Qualified_leads": 103, "Meetings": 52, "Reservations": 16, "Deals": 5, "Revenue": 39158425, "CPL": 2787.9684210526316, "Cost_per_deal": 105942.8, "ROMI": 72.9237116632749}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 88641, "Leads": 78, "Qualified_leads": 52, "Meetings": 28, "Reservations": 13, "Deals": 5, "Revenue": 41670305, "CPL": 1136.423076923077, "Cost_per_deal": 17728.2, "ROMI": 469.1019280017148}, {"Month": "2025-05", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 301249, "Leads": 104, "Qualified_leads": 46, "Meetings": 15, "Reservations": 4, "Deals": 1, "Revenue": 11892928, "CPL": 2896.625, "Cost_per_deal": 301249.0, "ROMI": 38.47873021985135}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 497124, "Leads": 186, "Qualified_leads": 102, "Meetings": 40, "Reservations": 13, "Deals": 4, "Revenue": 39332936, "CPL": 2672.7096774193546, "Cost_per_deal": 124281.0, "ROMI": 78.12097585310707}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 573725, "Leads": 185, "Qualified_leads": 97, "Meetings": 34, "Reservations": 9, "Deals": 2, "Revenue": 17399742, "CPL": 3101.2162162162163, "Cost_per_deal": 286862.5, "ROMI": 29.327669179484946}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 271804, "Leads": 165, "Qualified_leads": 73, "Meetings": 25, "Reservations": 7, "Deals": 1, "Revenue": 13020803, "CPL": 1647.2969696969697, "Cost_per_deal": 271804.0, "ROMI": 46.90511912996129}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 322895, "Leads": 177, "Qualified_leads": 62, "Meetings": 18, "Reservations": 5, "Deals": 1, "Revenue": 8224764, "CPL": 1824.265536723164, "Cost_per_deal": 322895.0, "ROMI": 24.471945988634076}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 374952, "Leads": 210, "Qualified_leads": 90, "Meetings": 30, "Reservations": 6, "Deals": 1, "Revenue": 9782536, "CPL": 1785.4857142857143, "Cost_per_deal": 374952.0, "ROMI": 25.090102199748234}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 476570, "Leads": 127, "Qualified_leads": 66, "Meetings": 33, "Reservations": 12, "Deals": 3, "Revenue": 37436937, "CPL": 3752.51968503937, "Cost_per_deal": 158856.66666666666, "ROMI": 77.5549593973603}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 448341, "Leads": 112, "Qualified_leads": 64, "Meetings": 33, "Reservations": 12, "Deals": 4, "Revenue": 49377488, "CPL": 4003.0446428571427, "Cost_per_deal": 112085.25, "ROMI": 109.13377763800321}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 92363, "Leads": 58, "Qualified_leads": 36, "Meetings": 20, "Reservations": 8, "Deals": 2, "Revenue": 29155950, "CPL": 1592.4655172413793, "Cost_per_deal": 46181.5, "ROMI": 314.66698786310536}, {"Month": "2025-05", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 237176, "Leads": 90, "Qualified_leads": 48, "Meetings": 15, "Reservations": 4, "Deals": 1, "Revenue": 12917077, "CPL": 2635.288888888889, "Cost_per_deal": 237176.0, "ROMI": 53.461990251964785}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 727469, "Leads": 238, "Qualified_leads": 105, "Meetings": 43, "Reservations": 13, "Deals": 3, "Revenue": 41643519, "CPL": 3056.59243697479, "Cost_per_deal": 242489.66666666666, "ROMI": 56.244389795303995}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 721086, "Leads": 295, "Qualified_leads": 162, "Meetings": 57, "Reservations": 15, "Deals": 4, "Revenue": 31573364, "CPL": 2444.3593220338985, "Cost_per_deal": 180271.5, "ROMI": 42.785850786175295}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 239363, "Leads": 111, "Qualified_leads": 48, "Meetings": 14, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 2156.4234234234236, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 479446, "Leads": 262, "Qualified_leads": 114, "Meetings": 32, "Reservations": 8, "Deals": 2, "Revenue": 16714644, "CPL": 1829.9465648854962, "Cost_per_deal": 239723.0, "ROMI": 33.862412033889115}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 373272, "Leads": 199, "Qualified_leads": 71, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 12104759, "CPL": 1875.7386934673366, "Cost_per_deal": 373272.0, "ROMI": 31.428789193939004}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 607085, "Leads": 162, "Qualified_leads": 102, "Meetings": 51, "Reservations": 21, "Deals": 8, "Revenue": 106290616, "CPL": 3747.438271604938, "Cost_per_deal": 75885.625, "ROMI": 174.08358137657825}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 490624, "Leads": 123, "Qualified_leads": 79, "Meetings": 37, "Reservations": 12, "Deals": 3, "Revenue": 28236138, "CPL": 3988.8130081300815, "Cost_per_deal": 163541.33333333334, "ROMI": 56.55148137881555}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 88537, "Leads": 77, "Qualified_leads": 50, "Meetings": 25, "Reservations": 10, "Deals": 4, "Revenue": 39064584, "CPL": 1149.8311688311687, "Cost_per_deal": 22134.25, "ROMI": 440.22326259078125}, {"Month": "2025-06", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 315686, "Leads": 107, "Qualified_leads": 52, "Meetings": 18, "Reservations": 4, "Deals": 1, "Revenue": 8368467, "CPL": 2950.336448598131, "Cost_per_deal": 315686.0, "ROMI": 25.50883156047465}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 684284, "Leads": 191, "Qualified_leads": 85, "Meetings": 34, "Reservations": 10, "Deals": 2, "Revenue": 26338496, "CPL": 3582.638743455497, "Cost_per_deal": 342142.0, "ROMI": 37.490591625699274}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 643511, "Leads": 201, "Qualified_leads": 96, "Meetings": 33, "Reservations": 10, "Deals": 3, "Revenue": 24548466, "CPL": 3201.547263681592, "Cost_per_deal": 214503.66666666666, "ROMI": 37.14770221488055}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 267812, "Leads": 150, "Qualified_leads": 65, "Meetings": 23, "Reservations": 6, "Deals": 1, "Revenue": 11232068, "CPL": 1785.4133333333334, "Cost_per_deal": 267812.0, "ROMI": 40.94012217525727}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 364673, "Leads": 184, "Qualified_leads": 71, "Meetings": 24, "Reservations": 7, "Deals": 1, "Revenue": 9373880, "CPL": 1981.9184782608695, "Cost_per_deal": 364673.0, "ROMI": 24.704891779758853}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 490597, "Leads": 232, "Qualified_leads": 98, "Meetings": 29, "Reservations": 7, "Deals": 2, "Revenue": 14847952, "CPL": 2114.6422413793102, "Cost_per_deal": 245298.5, "ROMI": 29.26506888545996}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 591840, "Leads": 177, "Qualified_leads": 92, "Meetings": 44, "Reservations": 18, "Deals": 5, "Revenue": 47601290, "CPL": 3343.728813559322, "Cost_per_deal": 118368.0, "ROMI": 79.42932211408488}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 496424, "Leads": 170, "Qualified_leads": 102, "Meetings": 50, "Reservations": 20, "Deals": 6, "Revenue": 62583294, "CPL": 2920.141176470588, "Cost_per_deal": 82737.33333333333, "ROMI": 125.0682279664158}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 75856, "Leads": 61, "Qualified_leads": 39, "Meetings": 19, "Reservations": 9, "Deals": 3, "Revenue": 38215761, "CPL": 1243.5409836065573, "Cost_per_deal": 25285.333333333332, "ROMI": 502.79351666315125}, {"Month": "2025-06", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 296481, "Leads": 83, "Qualified_leads": 40, "Meetings": 12, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3572.0602409638554, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 579680, "Leads": 171, "Qualified_leads": 89, "Meetings": 33, "Reservations": 9, "Deals": 3, "Revenue": 35282814, "CPL": 3389.941520467836, "Cost_per_deal": 193226.66666666666, "ROMI": 59.86601918299752}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 658180, "Leads": 203, "Qualified_leads": 113, "Meetings": 38, "Reservations": 11, "Deals": 2, "Revenue": 16050462, "CPL": 3242.266009852217, "Cost_per_deal": 329090.0, "ROMI": 23.386128414719376}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 249377, "Leads": 131, "Qualified_leads": 54, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 8207854, "CPL": 1903.6412213740457, "Cost_per_deal": 249377.0, "ROMI": 31.913436283217777}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 349235, "Leads": 128, "Qualified_leads": 58, "Meetings": 18, "Reservations": 4, "Deals": 1, "Revenue": 7917750, "CPL": 2728.3984375, "Cost_per_deal": 349235.0, "ROMI": 21.671696708520052}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 408943, "Leads": 197, "Qualified_leads": 79, "Meetings": 25, "Reservations": 5, "Deals": 1, "Revenue": 10330977, "CPL": 2075.8527918781724, "Cost_per_deal": 408943.0, "ROMI": 24.262633178707055}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 389010, "Leads": 112, "Qualified_leads": 67, "Meetings": 31, "Reservations": 13, "Deals": 4, "Revenue": 31361028, "CPL": 3473.3035714285716, "Cost_per_deal": 97252.5, "ROMI": 79.61753682424616}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 489143, "Leads": 165, "Qualified_leads": 92, "Meetings": 39, "Reservations": 12, "Deals": 4, "Revenue": 31702756, "CPL": 2964.5030303030303, "Cost_per_deal": 122285.75, "ROMI": 63.81285840745958}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 90614, "Leads": 81, "Qualified_leads": 48, "Meetings": 23, "Reservations": 10, "Deals": 4, "Revenue": 28307108, "CPL": 1118.6913580246915, "Cost_per_deal": 22653.5, "ROMI": 311.3922131237999}, {"Month": "2025-06", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 277505, "Leads": 95, "Qualified_leads": 42, "Meetings": 14, "Reservations": 4, "Deals": 1, "Revenue": 8095887, "CPL": 2921.1052631578946, "Cost_per_deal": 277505.0, "ROMI": 28.173841912758327}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 663446, "Leads": 208, "Qualified_leads": 93, "Meetings": 31, "Reservations": 10, "Deals": 3, "Revenue": 29051661, "CPL": 3189.644230769231, "Cost_per_deal": 221148.66666666666, "ROMI": 42.78903633453213}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 492022, "Leads": 198, "Qualified_leads": 107, "Meetings": 42, "Reservations": 12, "Deals": 4, "Revenue": 50057572, "CPL": 2484.959595959596, "Cost_per_deal": 123005.5, "ROMI": 100.73848323855438}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 221720, "Leads": 120, "Qualified_leads": 55, "Meetings": 17, "Reservations": 5, "Deals": 1, "Revenue": 9703423, "CPL": 1847.6666666666667, "Cost_per_deal": 221720.0, "ROMI": 42.76431084250406}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 422198, "Leads": 150, "Qualified_leads": 63, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 12050511, "CPL": 2814.653333333333, "Cost_per_deal": 422198.0, "ROMI": 27.5423213752789}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 413914, "Leads": 227, "Qualified_leads": 95, "Meetings": 27, "Reservations": 6, "Deals": 1, "Revenue": 8005753, "CPL": 1823.409691629956, "Cost_per_deal": 413914.0, "ROMI": 18.34158545011766}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 464199, "Leads": 122, "Qualified_leads": 74, "Meetings": 35, "Reservations": 12, "Deals": 3, "Revenue": 29701839, "CPL": 3804.909836065574, "Cost_per_deal": 154733.0, "ROMI": 62.98514214808735}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 526180, "Leads": 178, "Qualified_leads": 93, "Meetings": 43, "Reservations": 14, "Deals": 5, "Revenue": 52856265, "CPL": 2956.067415730337, "Cost_per_deal": 105236.0, "ROMI": 99.45282032764453}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 77096, "Leads": 55, "Qualified_leads": 32, "Meetings": 16, "Reservations": 6, "Deals": 2, "Revenue": 21695392, "CPL": 1401.7454545454545, "Cost_per_deal": 38548.0, "ROMI": 280.40749195807825}, {"Month": "2025-06", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 297937, "Leads": 104, "Qualified_leads": 44, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 13269302, "CPL": 2864.778846153846, "Cost_per_deal": 297937.0, "ROMI": 43.53727465873658}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 642141, "Leads": 238, "Qualified_leads": 106, "Meetings": 39, "Reservations": 11, "Deals": 3, "Revenue": 40700199, "CPL": 2698.0714285714284, "Cost_per_deal": 214047.0, "ROMI": 62.38202824613286}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 601039, "Leads": 221, "Qualified_leads": 105, "Meetings": 36, "Reservations": 12, "Deals": 4, "Revenue": 38994364, "CPL": 2719.633484162896, "Cost_per_deal": 150259.75, "ROMI": 63.87825914790887}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 258621, "Leads": 140, "Qualified_leads": 53, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 8141068, "CPL": 1847.2928571428572, "Cost_per_deal": 258621.0, "ROMI": 30.478758492156476}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 387085, "Leads": 212, "Qualified_leads": 75, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 8357605, "CPL": 1825.872641509434, "Cost_per_deal": 387085.0, "ROMI": 20.591136313729542}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 423559, "Leads": 233, "Qualified_leads": 104, "Meetings": 31, "Reservations": 7, "Deals": 1, "Revenue": 9340345, "CPL": 1817.8497854077252, "Cost_per_deal": 423559.0, "ROMI": 21.052051780271462}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 611544, "Leads": 148, "Qualified_leads": 74, "Meetings": 35, "Reservations": 14, "Deals": 5, "Revenue": 73115395, "CPL": 4132.054054054054, "Cost_per_deal": 122308.8, "ROMI": 118.5586826131889}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 507483, "Leads": 179, "Qualified_leads": 95, "Meetings": 46, "Reservations": 18, "Deals": 6, "Revenue": 51536898, "CPL": 2835.1005586592178, "Cost_per_deal": 84580.5, "ROMI": 100.55393973788284}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 109856, "Leads": 99, "Qualified_leads": 70, "Meetings": 35, "Reservations": 16, "Deals": 5, "Revenue": 46333100, "CPL": 1109.6565656565656, "Cost_per_deal": 21971.2, "ROMI": 420.7621249635887}, {"Month": "2025-07", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 347013, "Leads": 133, "Qualified_leads": 69, "Meetings": 24, "Reservations": 7, "Deals": 2, "Revenue": 19668722, "CPL": 2609.1203007518798, "Cost_per_deal": 173506.5, "ROMI": 55.6800725044883}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 757732, "Leads": 240, "Qualified_leads": 108, "Meetings": 40, "Reservations": 10, "Deals": 2, "Revenue": 26265294, "CPL": 3157.2166666666667, "Cost_per_deal": 378866.0, "ROMI": 33.66303917480059}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 606599, "Leads": 284, "Qualified_leads": 126, "Meetings": 42, "Reservations": 13, "Deals": 3, "Revenue": 31132596, "CPL": 2135.9119718309857, "Cost_per_deal": 202199.66666666666, "ROMI": 50.32319044376928}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 263887, "Leads": 132, "Qualified_leads": 64, "Meetings": 20, "Reservations": 6, "Deals": 1, "Revenue": 13769994, "CPL": 1999.1439393939395, "Cost_per_deal": 263887.0, "ROMI": 51.181403403729625}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 410170, "Leads": 201, "Qualified_leads": 73, "Meetings": 20, "Reservations": 6, "Deals": 1, "Revenue": 9837925, "CPL": 2040.6467661691543, "Cost_per_deal": 410170.0, "ROMI": 22.984994026866907}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 408935, "Leads": 216, "Qualified_leads": 89, "Meetings": 30, "Reservations": 8, "Deals": 2, "Revenue": 17477294, "CPL": 1893.2175925925926, "Cost_per_deal": 204467.5, "ROMI": 41.738562363211756}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 605440, "Leads": 173, "Qualified_leads": 98, "Meetings": 50, "Reservations": 18, "Deals": 6, "Revenue": 54838866, "CPL": 3499.6531791907514, "Cost_per_deal": 100906.66666666667, "ROMI": 89.57687962473572}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 606177, "Leads": 147, "Qualified_leads": 93, "Meetings": 45, "Reservations": 15, "Deals": 6, "Revenue": 49995822, "CPL": 4123.65306122449, "Cost_per_deal": 101029.5, "ROMI": 81.47726654096081}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 77216, "Leads": 51, "Qualified_leads": 28, "Meetings": 14, "Reservations": 6, "Deals": 2, "Revenue": 25795246, "CPL": 1514.0392156862745, "Cost_per_deal": 38608.0, "ROMI": 333.0660743887277}, {"Month": "2025-07", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 284331, "Leads": 92, "Qualified_leads": 42, "Meetings": 13, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 3090.554347826087, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 647784, "Leads": 265, "Qualified_leads": 147, "Meetings": 57, "Reservations": 18, "Deals": 6, "Revenue": 61023126, "CPL": 2444.467924528302, "Cost_per_deal": 107964.0, "ROMI": 93.20289170464228}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 534173, "Leads": 243, "Qualified_leads": 123, "Meetings": 51, "Reservations": 17, "Deals": 5, "Revenue": 49960645, "CPL": 2198.2427983539096, "Cost_per_deal": 106834.6, "ROMI": 92.52895971904233}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 259244, "Leads": 142, "Qualified_leads": 57, "Meetings": 20, "Reservations": 6, "Deals": 1, "Revenue": 12113830, "CPL": 1825.661971830986, "Cost_per_deal": 259244.0, "ROMI": 45.727523105645645}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 357461, "Leads": 171, "Qualified_leads": 72, "Meetings": 19, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 2090.4152046783624, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 357779, "Leads": 168, "Qualified_leads": 65, "Meetings": 19, "Reservations": 4, "Deals": 1, "Revenue": 7901831, "CPL": 2129.6369047619046, "Cost_per_deal": 357779.0, "ROMI": 21.085787595135546}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 411643, "Leads": 116, "Qualified_leads": 60, "Meetings": 27, "Reservations": 10, "Deals": 3, "Revenue": 26449245, "CPL": 3548.646551724138, "Cost_per_deal": 137214.33333333334, "ROMI": 63.25287202746069}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 453766, "Leads": 125, "Qualified_leads": 69, "Meetings": 36, "Reservations": 15, "Deals": 5, "Revenue": 54994215, "CPL": 3630.128, "Cost_per_deal": 90753.2, "ROMI": 120.19509835465857}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 70097, "Leads": 60, "Qualified_leads": 38, "Meetings": 18, "Reservations": 8, "Deals": 3, "Revenue": 35123745, "CPL": 1168.2833333333333, "Cost_per_deal": 23365.666666666668, "ROMI": 500.073441088777}, {"Month": "2025-07", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 242194, "Leads": 87, "Qualified_leads": 45, "Meetings": 16, "Reservations": 5, "Deals": 1, "Revenue": 9556858, "CPL": 2783.8390804597702, "Cost_per_deal": 242194.0, "ROMI": 38.45951592525001}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 633083, "Leads": 206, "Qualified_leads": 114, "Meetings": 38, "Reservations": 10, "Deals": 3, "Revenue": 40372518, "CPL": 3073.2184466019417, "Cost_per_deal": 211027.66666666666, "ROMI": 62.77128749310912}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 597143, "Leads": 202, "Qualified_leads": 99, "Meetings": 33, "Reservations": 10, "Deals": 3, "Revenue": 26832819, "CPL": 2956.1534653465346, "Cost_per_deal": 199047.66666666666, "ROMI": 43.935332072887064}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 245762, "Leads": 133, "Qualified_leads": 59, "Meetings": 18, "Reservations": 4, "Deals": 1, "Revenue": 11503586, "CPL": 1847.8345864661653, "Cost_per_deal": 245762.0, "ROMI": 45.80783033992236}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 450390, "Leads": 248, "Qualified_leads": 107, "Meetings": 30, "Reservations": 8, "Deals": 2, "Revenue": 18104094, "CPL": 1816.0887096774193, "Cost_per_deal": 225195.0, "ROMI": 39.196483048025044}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 439343, "Leads": 189, "Qualified_leads": 68, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 13017790, "CPL": 2324.5661375661375, "Cost_per_deal": 439343.0, "ROMI": 28.630129534327395}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 527319, "Leads": 122, "Qualified_leads": 71, "Meetings": 33, "Reservations": 13, "Deals": 4, "Revenue": 45877788, "CPL": 4322.286885245901, "Cost_per_deal": 131829.75, "ROMI": 86.00196275878548}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 475659, "Leads": 167, "Qualified_leads": 103, "Meetings": 48, "Reservations": 16, "Deals": 5, "Revenue": 63630545, "CPL": 2848.25748502994, "Cost_per_deal": 95131.8, "ROMI": 132.77344904648078}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 69718, "Leads": 55, "Qualified_leads": 37, "Meetings": 19, "Reservations": 8, "Deals": 4, "Revenue": 58787364, "CPL": 1267.6, "Cost_per_deal": 17429.5, "ROMI": 842.2164433862131}, {"Month": "2025-07", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 305555, "Leads": 103, "Qualified_leads": 52, "Meetings": 16, "Reservations": 5, "Deals": 1, "Revenue": 8800511, "CPL": 2966.5533980582522, "Cost_per_deal": 305555.0, "ROMI": 27.8017247304086}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 617228, "Leads": 210, "Qualified_leads": 93, "Meetings": 35, "Reservations": 10, "Deals": 3, "Revenue": 29839512, "CPL": 2939.1809523809525, "Cost_per_deal": 205742.66666666666, "ROMI": 47.34439137563429}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 676071, "Leads": 277, "Qualified_leads": 139, "Meetings": 52, "Reservations": 17, "Deals": 4, "Revenue": 34510384, "CPL": 2440.6895306859205, "Cost_per_deal": 169017.75, "ROMI": 50.04550261732865}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 335383, "Leads": 159, "Qualified_leads": 63, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 12677762, "CPL": 2109.327044025157, "Cost_per_deal": 335383.0, "ROMI": 36.80084858206886}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 430751, "Leads": 182, "Qualified_leads": 69, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 8495348, "CPL": 2366.763736263736, "Cost_per_deal": 430751.0, "ROMI": 18.72217824218632}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 408836, "Leads": 195, "Qualified_leads": 76, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 14337029, "CPL": 2096.594871794872, "Cost_per_deal": 408836.0, "ROMI": 34.067922100793474}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 544301, "Leads": 137, "Qualified_leads": 84, "Meetings": 36, "Reservations": 14, "Deals": 6, "Revenue": 57192966, "CPL": 3973.0, "Cost_per_deal": 90716.83333333333, "ROMI": 104.07598920450266}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 557675, "Leads": 177, "Qualified_leads": 94, "Meetings": 42, "Reservations": 15, "Deals": 5, "Revenue": 51128565, "CPL": 3150.7062146892654, "Cost_per_deal": 111535.0, "ROMI": 90.6816514995293}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 118020, "Leads": 102, "Qualified_leads": 73, "Meetings": 37, "Reservations": 17, "Deals": 7, "Revenue": 98292285, "CPL": 1157.0588235294117, "Cost_per_deal": 16860.0, "ROMI": 831.8443060498221}, {"Month": "2025-08", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 292964, "Leads": 93, "Qualified_leads": 40, "Meetings": 12, "Reservations": 3, "Deals": 0, "Revenue": 0, "CPL": 3150.1505376344085, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 667184, "Leads": 215, "Qualified_leads": 102, "Meetings": 37, "Reservations": 11, "Deals": 3, "Revenue": 23777256, "CPL": 3103.181395348837, "Cost_per_deal": 222394.66666666666, "ROMI": 34.63822873450203}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 668524, "Leads": 296, "Qualified_leads": 151, "Meetings": 62, "Reservations": 18, "Deals": 5, "Revenue": 56435000, "CPL": 2258.527027027027, "Cost_per_deal": 133704.8, "ROMI": 83.41731336496521}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 301051, "Leads": 140, "Qualified_leads": 65, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 7344646, "CPL": 2150.364285714286, "Cost_per_deal": 301051.0, "ROMI": 23.396683618390238}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 505080, "Leads": 267, "Qualified_leads": 118, "Meetings": 33, "Reservations": 8, "Deals": 2, "Revenue": 25542976, "CPL": 1891.685393258427, "Cost_per_deal": 252540.0, "ROMI": 49.57213906707848}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 491665, "Leads": 242, "Qualified_leads": 109, "Meetings": 34, "Reservations": 9, "Deals": 2, "Revenue": 27884032, "CPL": 2031.6735537190082, "Cost_per_deal": 245832.5, "ROMI": 55.71347767280567}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 656842, "Leads": 174, "Qualified_leads": 88, "Meetings": 37, "Reservations": 14, "Deals": 4, "Revenue": 28508192, "CPL": 3774.9540229885056, "Cost_per_deal": 164210.5, "ROMI": 42.40190182722786}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 518352, "Leads": 194, "Qualified_leads": 100, "Meetings": 46, "Reservations": 17, "Deals": 7, "Revenue": 59350403, "CPL": 2671.917525773196, "Cost_per_deal": 74050.28571428571, "ROMI": 113.498261798932}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 88560, "Leads": 55, "Qualified_leads": 30, "Meetings": 17, "Reservations": 8, "Deals": 3, "Revenue": 23213172, "CPL": 1610.1818181818182, "Cost_per_deal": 29520.0, "ROMI": 261.1180216802168}, {"Month": "2025-08", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 388005, "Leads": 149, "Qualified_leads": 79, "Meetings": 30, "Reservations": 8, "Deals": 2, "Revenue": 21031646, "CPL": 2604.0604026845635, "Cost_per_deal": 194002.5, "ROMI": 53.20457468331594}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 541226, "Leads": 177, "Qualified_leads": 93, "Meetings": 35, "Reservations": 12, "Deals": 4, "Revenue": 32551456, "CPL": 3057.774011299435, "Cost_per_deal": 135306.5, "ROMI": 59.143925088595154}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 620491, "Leads": 196, "Qualified_leads": 90, "Meetings": 30, "Reservations": 9, "Deals": 2, "Revenue": 24751360, "CPL": 3165.7704081632655, "Cost_per_deal": 310245.5, "ROMI": 38.88995811381632}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 231201, "Leads": 139, "Qualified_leads": 62, "Meetings": 18, "Reservations": 4, "Deals": 1, "Revenue": 9933492, "CPL": 1663.31654676259, "Cost_per_deal": 231201.0, "ROMI": 41.96474496217577}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 451959, "Leads": 165, "Qualified_leads": 67, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 7795959, "CPL": 2739.1454545454544, "Cost_per_deal": 451959.0, "ROMI": 16.249261548060776}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 322587, "Leads": 155, "Qualified_leads": 54, "Meetings": 15, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 2081.206451612903, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 539418, "Leads": 153, "Qualified_leads": 84, "Meetings": 39, "Reservations": 15, "Deals": 5, "Revenue": 39151630, "CPL": 3525.607843137255, "Cost_per_deal": 107883.6, "ROMI": 71.58124497143217}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 552686, "Leads": 185, "Qualified_leads": 104, "Meetings": 48, "Reservations": 17, "Deals": 6, "Revenue": 77076966, "CPL": 2987.491891891892, "Cost_per_deal": 92114.33333333333, "ROMI": 138.45887176443767}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 70315, "Leads": 62, "Qualified_leads": 37, "Meetings": 22, "Reservations": 11, "Deals": 5, "Revenue": 47771170, "CPL": 1134.1129032258063, "Cost_per_deal": 14063.0, "ROMI": 678.388039536372}, {"Month": "2025-08", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 285292, "Leads": 99, "Qualified_leads": 52, "Meetings": 17, "Reservations": 5, "Deals": 1, "Revenue": 10229969, "CPL": 2881.7373737373737, "Cost_per_deal": 285292.0, "ROMI": 34.8578894606228}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 716803, "Leads": 299, "Qualified_leads": 136, "Meetings": 53, "Reservations": 14, "Deals": 4, "Revenue": 57721964, "CPL": 2397.334448160535, "Cost_per_deal": 179200.75, "ROMI": 79.52695649990304}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 565329, "Leads": 182, "Qualified_leads": 81, "Meetings": 31, "Reservations": 9, "Deals": 2, "Revenue": 23410344, "CPL": 3106.203296703297, "Cost_per_deal": 282664.5, "ROMI": 40.41012401628078}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 245881, "Leads": 163, "Qualified_leads": 71, "Meetings": 25, "Reservations": 7, "Deals": 1, "Revenue": 8764317, "CPL": 1508.4723926380368, "Cost_per_deal": 245881.0, "ROMI": 34.64454756569235}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 469410, "Leads": 255, "Qualified_leads": 106, "Meetings": 35, "Reservations": 8, "Deals": 2, "Revenue": 19887188, "CPL": 1840.8235294117646, "Cost_per_deal": 234705.0, "ROMI": 41.366349246926994}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 452512, "Leads": 217, "Qualified_leads": 90, "Meetings": 24, "Reservations": 6, "Deals": 1, "Revenue": 8290138, "CPL": 2085.3087557603685, "Cost_per_deal": 452512.0, "ROMI": 17.32026112014709}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 472552, "Leads": 113, "Qualified_leads": 71, "Meetings": 34, "Reservations": 11, "Deals": 3, "Revenue": 25073052, "CPL": 4181.876106194691, "Cost_per_deal": 157517.33333333334, "ROMI": 52.05882103980091}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 495554, "Leads": 120, "Qualified_leads": 64, "Meetings": 27, "Reservations": 10, "Deals": 3, "Revenue": 24022902, "CPL": 4129.616666666667, "Cost_per_deal": 165184.66666666666, "ROMI": 47.47686024126533}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 73623, "Leads": 52, "Qualified_leads": 33, "Meetings": 16, "Reservations": 8, "Deals": 3, "Revenue": 24964734, "CPL": 1415.826923076923, "Cost_per_deal": 24541.0, "ROMI": 338.08879018784893}, {"Month": "2025-08", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Выставка недвижимости", "Spend": 316546, "Leads": 123, "Qualified_leads": 57, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 9830116, "CPL": 2573.5447154471544, "Cost_per_deal": 316546.0, "ROMI": 30.054304903552723}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 792537, "Leads": 296, "Qualified_leads": 142, "Meetings": 52, "Reservations": 14, "Deals": 3, "Revenue": 24156912, "CPL": 2677.489864864865, "Cost_per_deal": 264179.0, "ROMI": 29.480484822790608}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 819842, "Leads": 302, "Qualified_leads": 161, "Meetings": 57, "Reservations": 18, "Deals": 5, "Revenue": 47185950, "CPL": 2714.708609271523, "Cost_per_deal": 163968.4, "ROMI": 56.554931316034065}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 340041, "Leads": 202, "Qualified_leads": 79, "Meetings": 25, "Reservations": 6, "Deals": 1, "Revenue": 8226511, "CPL": 1683.3712871287128, "Cost_per_deal": 340041.0, "ROMI": 23.19270323284545}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 515457, "Leads": 229, "Qualified_leads": 86, "Meetings": 28, "Reservations": 7, "Deals": 1, "Revenue": 13873592, "CPL": 2250.9039301310045, "Cost_per_deal": 515457.0, "ROMI": 25.91512968104032}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 540798, "Leads": 243, "Qualified_leads": 90, "Meetings": 25, "Reservations": 7, "Deals": 2, "Revenue": 15533502, "CPL": 2225.5061728395062, "Cost_per_deal": 270399.0, "ROMI": 27.723297793261068}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 592655, "Leads": 188, "Qualified_leads": 109, "Meetings": 49, "Reservations": 18, "Deals": 5, "Revenue": 58243385, "CPL": 3152.4202127659573, "Cost_per_deal": 118531.0, "ROMI": 97.27536256338004}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 560239, "Leads": 147, "Qualified_leads": 80, "Meetings": 34, "Reservations": 11, "Deals": 4, "Revenue": 34975700, "CPL": 3811.1496598639455, "Cost_per_deal": 140059.75, "ROMI": 61.42996292653671}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 97692, "Leads": 83, "Qualified_leads": 58, "Meetings": 35, "Reservations": 16, "Deals": 6, "Revenue": 51905922, "CPL": 1177.012048192771, "Cost_per_deal": 16282.0, "ROMI": 530.3221348728657}, {"Month": "2025-09", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 330749, "Leads": 94, "Qualified_leads": 41, "Meetings": 14, "Reservations": 3, "Deals": 1, "Revenue": 7187178, "CPL": 3518.6063829787236, "Cost_per_deal": 330749.0, "ROMI": 20.730006742272842}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 761135, "Leads": 273, "Qualified_leads": 140, "Meetings": 52, "Reservations": 16, "Deals": 4, "Revenue": 30558848, "CPL": 2788.040293040293, "Cost_per_deal": 190283.75, "ROMI": 39.14905108817752}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 725552, "Leads": 290, "Qualified_leads": 144, "Meetings": 52, "Reservations": 16, "Deals": 5, "Revenue": 68468260, "CPL": 2501.903448275862, "Cost_per_deal": 145110.4, "ROMI": 93.36713012988731}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 249590, "Leads": 126, "Qualified_leads": 51, "Meetings": 19, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 1980.873015873016, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 479625, "Leads": 226, "Qualified_leads": 90, "Meetings": 25, "Reservations": 6, "Deals": 1, "Revenue": 12522993, "CPL": 2122.234513274336, "Cost_per_deal": 479625.0, "ROMI": 25.10996716184519}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 483389, "Leads": 207, "Qualified_leads": 85, "Meetings": 25, "Reservations": 7, "Deals": 1, "Revenue": 14234848, "CPL": 2335.2125603864733, "Cost_per_deal": 483389.0, "ROMI": 28.4480180558515}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 511501, "Leads": 115, "Qualified_leads": 72, "Meetings": 30, "Reservations": 10, "Deals": 3, "Revenue": 21543438, "CPL": 4447.834782608696, "Cost_per_deal": 170500.33333333334, "ROMI": 41.11807601549166}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 620572, "Leads": 207, "Qualified_leads": 122, "Meetings": 56, "Reservations": 20, "Deals": 6, "Revenue": 72041472, "CPL": 2997.9323671497586, "Cost_per_deal": 103428.66666666667, "ROMI": 115.08882128101172}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 95793, "Leads": 73, "Qualified_leads": 47, "Meetings": 25, "Reservations": 10, "Deals": 4, "Revenue": 55395220, "CPL": 1312.2328767123288, "Cost_per_deal": 23948.25, "ROMI": 577.2804589061831}, {"Month": "2025-09", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 316592, "Leads": 123, "Qualified_leads": 60, "Meetings": 20, "Reservations": 6, "Deals": 1, "Revenue": 11781137, "CPL": 2573.918699186992, "Cost_per_deal": 316592.0, "ROMI": 36.21236481022894}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 769815, "Leads": 265, "Qualified_leads": 127, "Meetings": 47, "Reservations": 14, "Deals": 4, "Revenue": 42006716, "CPL": 2904.9622641509436, "Cost_per_deal": 192453.75, "ROMI": 53.567286945564845}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 606466, "Leads": 192, "Qualified_leads": 100, "Meetings": 37, "Reservations": 11, "Deals": 2, "Revenue": 17242452, "CPL": 3158.6770833333335, "Cost_per_deal": 303233.0, "ROMI": 27.431028285180044}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 231042, "Leads": 122, "Qualified_leads": 49, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 10333339, "CPL": 1893.7868852459017, "Cost_per_deal": 231042.0, "ROMI": 43.724937457258854}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 414843, "Leads": 148, "Qualified_leads": 64, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 8519340, "CPL": 2802.9932432432433, "Cost_per_deal": 414843.0, "ROMI": 19.536299274665357}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 429400, "Leads": 172, "Qualified_leads": 68, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 12180852, "CPL": 2496.5116279069766, "Cost_per_deal": 429400.0, "ROMI": 27.36714485328365}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 587983, "Leads": 147, "Qualified_leads": 80, "Meetings": 38, "Reservations": 15, "Deals": 4, "Revenue": 44255900, "CPL": 3999.8843537414964, "Cost_per_deal": 146995.75, "ROMI": 74.26731215018121}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 449467, "Leads": 131, "Qualified_leads": 75, "Meetings": 32, "Reservations": 12, "Deals": 3, "Revenue": 35452863, "CPL": 3431.0458015267177, "Cost_per_deal": 149822.33333333334, "ROMI": 77.87756609495247}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 90020, "Leads": 79, "Qualified_leads": 48, "Meetings": 26, "Reservations": 12, "Deals": 4, "Revenue": 47100096, "CPL": 1139.493670886076, "Cost_per_deal": 22505.0, "ROMI": 522.218129304599}, {"Month": "2025-09", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 336675, "Leads": 109, "Qualified_leads": 47, "Meetings": 17, "Reservations": 5, "Deals": 1, "Revenue": 8539905, "CPL": 3088.761467889908, "Cost_per_deal": 336675.0, "ROMI": 24.365426598351526}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 800396, "Leads": 326, "Qualified_leads": 157, "Meetings": 59, "Reservations": 18, "Deals": 5, "Revenue": 40489545, "CPL": 2455.20245398773, "Cost_per_deal": 160079.2, "ROMI": 49.586890739084154}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 727625, "Leads": 288, "Qualified_leads": 140, "Meetings": 50, "Reservations": 17, "Deals": 5, "Revenue": 45459440, "CPL": 2526.4756944444443, "Cost_per_deal": 145525.0, "ROMI": 61.47646796083147}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 262969, "Leads": 172, "Qualified_leads": 68, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 8782640, "CPL": 1528.889534883721, "Cost_per_deal": 262969.0, "ROMI": 32.3980050880522}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 500431, "Leads": 254, "Qualified_leads": 99, "Meetings": 29, "Reservations": 7, "Deals": 2, "Revenue": 18828142, "CPL": 1970.2007874015749, "Cost_per_deal": 250215.5, "ROMI": 36.62385223936966}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 397600, "Leads": 169, "Qualified_leads": 65, "Meetings": 20, "Reservations": 4, "Deals": 1, "Revenue": 8528618, "CPL": 2352.662721893491, "Cost_per_deal": 397600.0, "ROMI": 20.45024647887324}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 669650, "Leads": 223, "Qualified_leads": 116, "Meetings": 49, "Reservations": 19, "Deals": 7, "Revenue": 80015530, "CPL": 3002.914798206278, "Cost_per_deal": 95664.28571428571, "ROMI": 118.48858358844173}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 559982, "Leads": 202, "Qualified_leads": 114, "Meetings": 54, "Reservations": 18, "Deals": 6, "Revenue": 42695640, "CPL": 2772.1881188118814, "Cost_per_deal": 93330.33333333333, "ROMI": 75.24466500708951}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 97394, "Leads": 91, "Qualified_leads": 50, "Meetings": 25, "Reservations": 9, "Deals": 4, "Revenue": 32664548, "CPL": 1070.2637362637363, "Cost_per_deal": 24348.5, "ROMI": 334.3856295048976}, {"Month": "2025-09", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 320043, "Leads": 89, "Qualified_leads": 46, "Meetings": 17, "Reservations": 4, "Deals": 1, "Revenue": 10289130, "CPL": 3595.9887640449438, "Cost_per_deal": 320043.0, "ROMI": 31.149211199745036}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 806137, "Leads": 268, "Qualified_leads": 123, "Meetings": 45, "Reservations": 12, "Deals": 4, "Revenue": 34861952, "CPL": 3007.973880597015, "Cost_per_deal": 201534.25, "ROMI": 42.245691489163754}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 818137, "Leads": 291, "Qualified_leads": 131, "Meetings": 52, "Reservations": 18, "Deals": 4, "Revenue": 44849956, "CPL": 2811.46735395189, "Cost_per_deal": 204534.25, "ROMI": 53.81961578562026}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 276822, "Leads": 166, "Qualified_leads": 66, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 11962886, "CPL": 1667.6024096385543, "Cost_per_deal": 276822.0, "ROMI": 42.21508406123791}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 578405, "Leads": 224, "Qualified_leads": 89, "Meetings": 26, "Reservations": 6, "Deals": 1, "Revenue": 12157888, "CPL": 2582.1651785714284, "Cost_per_deal": 578405.0, "ROMI": 20.019679982019518}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 523836, "Leads": 202, "Qualified_leads": 83, "Meetings": 27, "Reservations": 7, "Deals": 2, "Revenue": 19922290, "CPL": 2593.2475247524753, "Cost_per_deal": 261918.0, "ROMI": 37.03154040577586}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 694147, "Leads": 201, "Qualified_leads": 112, "Meetings": 58, "Reservations": 21, "Deals": 8, "Revenue": 79726432, "CPL": 3453.467661691542, "Cost_per_deal": 86768.375, "ROMI": 113.8552568836284}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 733007, "Leads": 222, "Qualified_leads": 130, "Meetings": 61, "Reservations": 19, "Deals": 7, "Revenue": 54292196, "CPL": 3301.8333333333335, "Cost_per_deal": 104715.28571428571, "ROMI": 73.0677728862071}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 131885, "Leads": 103, "Qualified_leads": 57, "Meetings": 31, "Reservations": 14, "Deals": 7, "Revenue": 86069445, "CPL": 1280.4368932038835, "Cost_per_deal": 18840.714285714286, "ROMI": 651.6098115782689}, {"Month": "2025-10", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 458826, "Leads": 118, "Qualified_leads": 53, "Meetings": 18, "Reservations": 6, "Deals": 2, "Revenue": 15715634, "CPL": 3888.35593220339, "Cost_per_deal": 229413.0, "ROMI": 33.251838387536885}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 681280, "Leads": 273, "Qualified_leads": 122, "Meetings": 45, "Reservations": 14, "Deals": 4, "Revenue": 31183428, "CPL": 2495.5311355311355, "Cost_per_deal": 170320.0, "ROMI": 44.77182362611555}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 747669, "Leads": 241, "Qualified_leads": 117, "Meetings": 40, "Reservations": 13, "Deals": 4, "Revenue": 58232960, "CPL": 3102.360995850622, "Cost_per_deal": 186917.25, "ROMI": 76.88601640565544}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 350863, "Leads": 172, "Qualified_leads": 75, "Meetings": 25, "Reservations": 7, "Deals": 2, "Revenue": 20155840, "CPL": 2039.9011627906978, "Cost_per_deal": 175431.5, "ROMI": 56.44646770961885}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 515769, "Leads": 185, "Qualified_leads": 83, "Meetings": 24, "Reservations": 6, "Deals": 1, "Revenue": 12227851, "CPL": 2787.9405405405405, "Cost_per_deal": 515769.0, "ROMI": 22.707999123638682}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 556994, "Leads": 241, "Qualified_leads": 100, "Meetings": 33, "Reservations": 9, "Deals": 2, "Revenue": 16318744, "CPL": 2311.1784232365144, "Cost_per_deal": 278497.0, "ROMI": 28.297881126188074}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 634628, "Leads": 145, "Qualified_leads": 92, "Meetings": 46, "Reservations": 17, "Deals": 7, "Revenue": 61574373, "CPL": 4376.744827586207, "Cost_per_deal": 90661.14285714286, "ROMI": 96.02435600068071}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 621932, "Leads": 206, "Qualified_leads": 130, "Meetings": 55, "Reservations": 22, "Deals": 8, "Revenue": 60564472, "CPL": 3019.0873786407765, "Cost_per_deal": 77741.5, "ROMI": 96.38117993607018}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 117995, "Leads": 75, "Qualified_leads": 45, "Meetings": 24, "Reservations": 11, "Deals": 4, "Revenue": 49467320, "CPL": 1573.2666666666667, "Cost_per_deal": 29498.75, "ROMI": 418.2323403534048}, {"Month": "2025-10", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 398270, "Leads": 153, "Qualified_leads": 67, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 8836270, "CPL": 2603.0718954248364, "Cost_per_deal": 398270.0, "ROMI": 21.18663218419665}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 554752, "Leads": 235, "Qualified_leads": 117, "Meetings": 41, "Reservations": 12, "Deals": 4, "Revenue": 40213676, "CPL": 2360.6468085106385, "Cost_per_deal": 138688.0, "ROMI": 71.4894655629903}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 683667, "Leads": 211, "Qualified_leads": 102, "Meetings": 36, "Reservations": 10, "Deals": 3, "Revenue": 33549498, "CPL": 3240.127962085308, "Cost_per_deal": 227889.0, "ROMI": 48.07286442083646}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 272753, "Leads": 120, "Qualified_leads": 54, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 12764307, "CPL": 2272.9416666666666, "Cost_per_deal": 272753.0, "ROMI": 45.79804438447973}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 446796, "Leads": 228, "Qualified_leads": 91, "Meetings": 25, "Reservations": 6, "Deals": 1, "Revenue": 12424462, "CPL": 1959.6315789473683, "Cost_per_deal": 446796.0, "ROMI": 26.807907859515304}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 381991, "Leads": 204, "Qualified_leads": 75, "Meetings": 21, "Reservations": 4, "Deals": 1, "Revenue": 11930361, "CPL": 1872.5049019607843, "Cost_per_deal": 381991.0, "ROMI": 30.23204735190096}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 552921, "Leads": 153, "Qualified_leads": 80, "Meetings": 34, "Reservations": 11, "Deals": 3, "Revenue": 27136227, "CPL": 3613.8627450980393, "Cost_per_deal": 184307.0, "ROMI": 48.07794603569045}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 647965, "Leads": 186, "Qualified_leads": 109, "Meetings": 55, "Reservations": 19, "Deals": 8, "Revenue": 67435928, "CPL": 3483.6827956989246, "Cost_per_deal": 80995.625, "ROMI": 103.07341137252784}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 97863, "Leads": 90, "Qualified_leads": 63, "Meetings": 32, "Reservations": 15, "Deals": 7, "Revenue": 92938699, "CPL": 1087.3666666666666, "Cost_per_deal": 13980.42857142857, "ROMI": 948.6816876654098}, {"Month": "2025-10", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 358603, "Leads": 126, "Qualified_leads": 63, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 14173863, "CPL": 2846.0555555555557, "Cost_per_deal": 358603.0, "ROMI": 38.52522148448284}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 810709, "Leads": 258, "Qualified_leads": 128, "Meetings": 53, "Reservations": 17, "Deals": 5, "Revenue": 60982465, "CPL": 3142.282945736434, "Cost_per_deal": 162141.8, "ROMI": 74.2211521026657}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 704992, "Leads": 301, "Qualified_leads": 151, "Meetings": 57, "Reservations": 19, "Deals": 5, "Revenue": 38098025, "CPL": 2342.1661129568106, "Cost_per_deal": 140998.4, "ROMI": 53.040364997049615}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 313440, "Leads": 178, "Qualified_leads": 76, "Meetings": 23, "Reservations": 6, "Deals": 1, "Revenue": 8655056, "CPL": 1760.8988764044943, "Cost_per_deal": 313440.0, "ROMI": 26.613118938233793}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 448497, "Leads": 171, "Qualified_leads": 60, "Meetings": 19, "Reservations": 4, "Deals": 1, "Revenue": 8784976, "CPL": 2622.7894736842104, "Cost_per_deal": 448497.0, "ROMI": 18.587591444312896}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 480023, "Leads": 213, "Qualified_leads": 96, "Meetings": 31, "Reservations": 8, "Deals": 2, "Revenue": 18658346, "CPL": 2253.629107981221, "Cost_per_deal": 240011.5, "ROMI": 37.86969166060793}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 527004, "Leads": 176, "Qualified_leads": 98, "Meetings": 41, "Reservations": 15, "Deals": 4, "Revenue": 30941964, "CPL": 2994.340909090909, "Cost_per_deal": 131751.0, "ROMI": 57.712958535419084}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 659929, "Leads": 218, "Qualified_leads": 138, "Meetings": 68, "Reservations": 28, "Deals": 8, "Revenue": 103596528, "CPL": 3027.197247706422, "Cost_per_deal": 82491.125, "ROMI": 155.98132374846384}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 97136, "Leads": 62, "Qualified_leads": 37, "Meetings": 20, "Reservations": 10, "Deals": 5, "Revenue": 51824560, "CPL": 1566.7096774193549, "Cost_per_deal": 19427.2, "ROMI": 532.5257782902322}, {"Month": "2025-10", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 318632, "Leads": 92, "Qualified_leads": 46, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 11642610, "CPL": 3463.391304347826, "Cost_per_deal": 318632.0, "ROMI": 35.53936202264681}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 960189, "Leads": 358, "Qualified_leads": 200, "Meetings": 74, "Reservations": 23, "Deals": 7, "Revenue": 85560132, "CPL": 2682.09217877095, "Cost_per_deal": 137169.85714285713, "ROMI": 88.10759444234417}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 928769, "Leads": 284, "Qualified_leads": 146, "Meetings": 57, "Reservations": 16, "Deals": 4, "Revenue": 34719360, "CPL": 3270.31338028169, "Cost_per_deal": 232192.25, "ROMI": 36.38212623375672}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 287735, "Leads": 128, "Qualified_leads": 62, "Meetings": 19, "Reservations": 5, "Deals": 1, "Revenue": 8989746, "CPL": 2247.9296875, "Cost_per_deal": 287735.0, "ROMI": 30.243143865014684}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 627106, "Leads": 222, "Qualified_leads": 92, "Meetings": 28, "Reservations": 6, "Deals": 1, "Revenue": 9019236, "CPL": 2824.801801801802, "Cost_per_deal": 627106.0, "ROMI": 13.382314951539293}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 634251, "Leads": 337, "Qualified_leads": 149, "Meetings": 41, "Reservations": 10, "Deals": 2, "Revenue": 25896740, "CPL": 1882.0504451038576, "Cost_per_deal": 317125.5, "ROMI": 39.830428332001055}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 802483, "Leads": 250, "Qualified_leads": 147, "Meetings": 71, "Reservations": 25, "Deals": 10, "Revenue": 70797650, "CPL": 3209.932, "Cost_per_deal": 80248.3, "ROMI": 87.22323962002933}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 594501, "Leads": 144, "Qualified_leads": 91, "Meetings": 43, "Reservations": 15, "Deals": 5, "Revenue": 62335595, "CPL": 4128.479166666667, "Cost_per_deal": 118900.2, "ROMI": 103.85364196191428}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 131814, "Leads": 119, "Qualified_leads": 83, "Meetings": 49, "Reservations": 21, "Deals": 8, "Revenue": 58138064, "CPL": 1107.6806722689075, "Cost_per_deal": 16476.75, "ROMI": 440.0613743608418}, {"Month": "2025-11", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 349827, "Leads": 113, "Qualified_leads": 49, "Meetings": 17, "Reservations": 5, "Deals": 1, "Revenue": 7015183, "CPL": 3095.8141592920356, "Cost_per_deal": 349827.0, "ROMI": 19.053292055787576}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 815837, "Leads": 317, "Qualified_leads": 156, "Meetings": 60, "Reservations": 17, "Deals": 5, "Revenue": 46844240, "CPL": 2573.6182965299686, "Cost_per_deal": 163167.4, "ROMI": 56.4186265148553}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 737989, "Leads": 321, "Qualified_leads": 152, "Meetings": 52, "Reservations": 14, "Deals": 4, "Revenue": 58258160, "CPL": 2299.031152647975, "Cost_per_deal": 184497.25, "ROMI": 77.94177284485271}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 262535, "Leads": 167, "Qualified_leads": 65, "Meetings": 21, "Reservations": 6, "Deals": 1, "Revenue": 11103231, "CPL": 1572.065868263473, "Cost_per_deal": 262535.0, "ROMI": 41.29238387262651}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 527152, "Leads": 217, "Qualified_leads": 91, "Meetings": 30, "Reservations": 6, "Deals": 1, "Revenue": 8671557, "CPL": 2429.2718894009217, "Cost_per_deal": 527152.0, "ROMI": 15.449822821501199}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 497132, "Leads": 199, "Qualified_leads": 75, "Meetings": 21, "Reservations": 5, "Deals": 1, "Revenue": 9525482, "CPL": 2498.1507537688444, "Cost_per_deal": 497132.0, "ROMI": 18.160870754648666}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 704221, "Leads": 238, "Qualified_leads": 128, "Meetings": 61, "Reservations": 24, "Deals": 9, "Revenue": 112334121, "CPL": 2958.9117647058824, "Cost_per_deal": 78246.77777777778, "ROMI": 158.51543762540453}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 650710, "Leads": 210, "Qualified_leads": 134, "Meetings": 58, "Reservations": 22, "Deals": 7, "Revenue": 85710646, "CPL": 3098.6190476190477, "Cost_per_deal": 92958.57142857143, "ROMI": 130.71865500760708}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 95743, "Leads": 75, "Qualified_leads": 45, "Meetings": 23, "Reservations": 11, "Deals": 5, "Revenue": 60490520, "CPL": 1276.5733333333333, "Cost_per_deal": 19148.6, "ROMI": 630.8009671725348}, {"Month": "2025-11", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 372845, "Leads": 132, "Qualified_leads": 59, "Meetings": 18, "Reservations": 5, "Deals": 1, "Revenue": 12063917, "CPL": 2824.5833333333335, "Cost_per_deal": 372845.0, "ROMI": 31.356386702248923}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 624987, "Leads": 212, "Qualified_leads": 91, "Meetings": 35, "Reservations": 11, "Deals": 3, "Revenue": 22909650, "CPL": 2948.051886792453, "Cost_per_deal": 208329.0, "ROMI": 35.65620244901094}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 606966, "Leads": 191, "Qualified_leads": 95, "Meetings": 34, "Reservations": 10, "Deals": 3, "Revenue": 22361538, "CPL": 3177.832460732984, "Cost_per_deal": 202322.0, "ROMI": 35.8415001828768}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 289530, "Leads": 189, "Qualified_leads": 81, "Meetings": 29, "Reservations": 8, "Deals": 2, "Revenue": 21497170, "CPL": 1531.904761904762, "Cost_per_deal": 144765.0, "ROMI": 73.24850619970297}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 495352, "Leads": 245, "Qualified_leads": 95, "Meetings": 29, "Reservations": 6, "Deals": 1, "Revenue": 8796545, "CPL": 2021.8448979591838, "Cost_per_deal": 495352.0, "ROMI": 16.758169947835075}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 365315, "Leads": 159, "Qualified_leads": 65, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 9814513, "CPL": 2297.578616352201, "Cost_per_deal": 365315.0, "ROMI": 25.865891080300564}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 600238, "Leads": 147, "Qualified_leads": 76, "Meetings": 32, "Reservations": 12, "Deals": 4, "Revenue": 33109688, "CPL": 4083.2517006802723, "Cost_per_deal": 150059.5, "ROMI": 54.16093282997744}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 516519, "Leads": 151, "Qualified_leads": 76, "Meetings": 38, "Reservations": 14, "Deals": 4, "Revenue": 33313668, "CPL": 3420.655629139073, "Cost_per_deal": 129129.75, "ROMI": 63.496500612755774}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 90902, "Leads": 83, "Qualified_leads": 59, "Meetings": 33, "Reservations": 16, "Deals": 8, "Revenue": 65557080, "CPL": 1095.2048192771085, "Cost_per_deal": 11362.75, "ROMI": 720.1841323623242}, {"Month": "2025-11", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 397846, "Leads": 153, "Qualified_leads": 74, "Meetings": 25, "Reservations": 7, "Deals": 2, "Revenue": 21337720, "CPL": 2600.300653594771, "Cost_per_deal": 198923.0, "ROMI": 52.63311432061652}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 756763, "Leads": 324, "Qualified_leads": 143, "Meetings": 56, "Reservations": 17, "Deals": 6, "Revenue": 69583860, "CPL": 2335.688271604938, "Cost_per_deal": 126127.16666666667, "ROMI": 90.94934213221312}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 682368, "Leads": 247, "Qualified_leads": 138, "Meetings": 48, "Reservations": 14, "Deals": 4, "Revenue": 42554092, "CPL": 2762.6234817813765, "Cost_per_deal": 170592.0, "ROMI": 61.36237924404427}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Органика — ЖК", "Spend": 264294, "Leads": 143, "Qualified_leads": 62, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 10621619, "CPL": 1848.2097902097903, "Cost_per_deal": 264294.0, "ROMI": 39.18864976125073}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 465270, "Leads": 197, "Qualified_leads": 76, "Meetings": 23, "Reservations": 6, "Deals": 1, "Revenue": 9879131, "CPL": 2361.776649746193, "Cost_per_deal": 465270.0, "ROMI": 20.233114105788037}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 436567, "Leads": 232, "Qualified_leads": 96, "Meetings": 27, "Reservations": 6, "Deals": 1, "Revenue": 8426755, "CPL": 1881.7543103448277, "Cost_per_deal": 436567.0, "ROMI": 18.302317857281928}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 566999, "Leads": 168, "Qualified_leads": 101, "Meetings": 43, "Reservations": 17, "Deals": 7, "Revenue": 83336918, "CPL": 3374.9940476190477, "Cost_per_deal": 80999.85714285714, "ROMI": 145.97895058015976}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 499440, "Leads": 134, "Qualified_leads": 68, "Meetings": 29, "Reservations": 12, "Deals": 4, "Revenue": 43261680, "CPL": 3727.1641791044776, "Cost_per_deal": 124860.0, "ROMI": 85.62037481979817}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Клуб рекомендаций", "Spend": 93606, "Leads": 62, "Qualified_leads": 42, "Meetings": 21, "Reservations": 9, "Deals": 3, "Revenue": 26122509, "CPL": 1509.774193548387, "Cost_per_deal": 31202.0, "ROMI": 278.0687455932312}, {"Month": "2025-11", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 394762, "Leads": 109, "Qualified_leads": 49, "Meetings": 16, "Reservations": 4, "Deals": 1, "Revenue": 9686572, "CPL": 3621.669724770642, "Cost_per_deal": 394762.0, "ROMI": 23.53775186061475}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 934493, "Leads": 324, "Qualified_leads": 142, "Meetings": 47, "Reservations": 15, "Deals": 5, "Revenue": 58736420, "CPL": 2884.2376543209875, "Cost_per_deal": 186898.6, "ROMI": 61.853782746366214}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 995582, "Leads": 341, "Qualified_leads": 187, "Meetings": 78, "Reservations": 21, "Deals": 7, "Revenue": 57062740, "CPL": 2919.5953079178885, "Cost_per_deal": 142226.0, "ROMI": 56.315961919761506}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 304992, "Leads": 198, "Qualified_leads": 86, "Meetings": 27, "Reservations": 7, "Deals": 2, "Revenue": 28996352, "CPL": 1540.3636363636363, "Cost_per_deal": 152496.0, "ROMI": 94.07250026230196}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 468124, "Leads": 215, "Qualified_leads": 79, "Meetings": 25, "Reservations": 7, "Deals": 1, "Revenue": 10809431, "CPL": 2177.320930232558, "Cost_per_deal": 468124.0, "ROMI": 22.090956669600363}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Соцсети", "Campaign": "VK — показы", "Spend": 532514, "Leads": 208, "Qualified_leads": 77, "Meetings": 24, "Reservations": 6, "Deals": 1, "Revenue": 7407400, "CPL": 2560.1634615384614, "Cost_per_deal": 532514.0, "ROMI": 12.910244613287162}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 818170, "Leads": 249, "Qualified_leads": 157, "Meetings": 78, "Reservations": 26, "Deals": 9, "Revenue": 97035156, "CPL": 3285.8232931726907, "Cost_per_deal": 90907.77777777778, "ROMI": 117.6002371145361}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 836032, "Leads": 219, "Qualified_leads": 117, "Meetings": 61, "Reservations": 24, "Deals": 7, "Revenue": 55022751, "CPL": 3817.497716894977, "Cost_per_deal": 119433.14285714286, "ROMI": 64.81416859641736}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 124087, "Leads": 93, "Qualified_leads": 62, "Meetings": 35, "Reservations": 17, "Deals": 7, "Revenue": 52749116, "CPL": 1334.268817204301, "Cost_per_deal": 17726.714285714286, "ROMI": 424.097842642662}, {"Month": "2025-12", "Project": "Северный парк", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 381035, "Leads": 143, "Qualified_leads": 59, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 8518539, "CPL": 2664.5804195804194, "Cost_per_deal": 381035.0, "ROMI": 21.356316348891834}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 797466, "Leads": 242, "Qualified_leads": 128, "Meetings": 47, "Reservations": 13, "Deals": 3, "Revenue": 34215879, "CPL": 3295.314049586777, "Cost_per_deal": 265822.0, "ROMI": 41.90575272174613}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 923823, "Leads": 336, "Qualified_leads": 168, "Meetings": 66, "Reservations": 23, "Deals": 6, "Revenue": 70729902, "CPL": 2749.473214285714, "Cost_per_deal": 153970.5, "ROMI": 75.56217911872729}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "SEO", "Campaign": "Органика — квартиры", "Spend": 332202, "Leads": 181, "Qualified_leads": 86, "Meetings": 31, "Reservations": 8, "Deals": 1, "Revenue": 7117894, "CPL": 1835.3701657458564, "Cost_per_deal": 332202.0, "ROMI": 20.426403212503235}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 451354, "Leads": 197, "Qualified_leads": 83, "Meetings": 23, "Reservations": 6, "Deals": 1, "Revenue": 14710951, "CPL": 2291.1370558375634, "Cost_per_deal": 451354.0, "ROMI": 31.592933706137533}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 489281, "Leads": 205, "Qualified_leads": 74, "Meetings": 20, "Reservations": 5, "Deals": 1, "Revenue": 10897682, "CPL": 2386.7365853658534, "Cost_per_deal": 489281.0, "ROMI": 21.272849344241855}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 694535, "Leads": 201, "Qualified_leads": 111, "Meetings": 53, "Reservations": 20, "Deals": 6, "Revenue": 82105716, "CPL": 3455.3980099502487, "Cost_per_deal": 115755.83333333333, "ROMI": 117.21681556725004}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Агентства", "Campaign": "Корпоративные продажи", "Spend": 752479, "Leads": 249, "Qualified_leads": 125, "Meetings": 61, "Reservations": 25, "Deals": 8, "Revenue": 117748072, "CPL": 3022.004016064257, "Cost_per_deal": 94059.875, "ROMI": 155.48021007895238}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Рекомендации", "Campaign": "Клиенты партнёров", "Spend": 105665, "Leads": 81, "Qualified_leads": 47, "Meetings": 24, "Reservations": 12, "Deals": 4, "Revenue": 40519284, "CPL": 1304.5061728395062, "Cost_per_deal": 26416.25, "ROMI": 382.4693039322387}, {"Month": "2025-12", "Project": "Городские сады", "Channel": "Оффлайн", "Campaign": "Офис продаж", "Spend": 404162, "Leads": 110, "Qualified_leads": 50, "Meetings": 17, "Reservations": 4, "Deals": 0, "Revenue": 0, "CPL": 3674.2, "Cost_per_deal": NaN, "ROMI": -1.0}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Ретаргетинг", "Spend": 620273, "Leads": 187, "Qualified_leads": 103, "Meetings": 37, "Reservations": 10, "Deals": 3, "Revenue": 37315728, "CPL": 3316.9679144385027, "Cost_per_deal": 206757.66666666666, "ROMI": 59.1601681840093}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Яндекс.Директ", "Campaign": "Поиск — семейные ЖК", "Spend": 582740, "Leads": 254, "Qualified_leads": 116, "Meetings": 47, "Reservations": 14, "Deals": 4, "Revenue": 33947916, "CPL": 2294.251968503937, "Cost_per_deal": 145685.0, "ROMI": 57.25568177918111}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 330056, "Leads": 201, "Qualified_leads": 87, "Meetings": 31, "Reservations": 7, "Deals": 1, "Revenue": 8292684, "CPL": 1642.0696517412935, "Cost_per_deal": 330056.0, "ROMI": 24.125081804299878}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 408786, "Leads": 194, "Qualified_leads": 79, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 9673782, "CPL": 2107.144329896907, "Cost_per_deal": 408786.0, "ROMI": 22.66466072712862}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 463126, "Leads": 231, "Qualified_leads": 87, "Meetings": 26, "Reservations": 6, "Deals": 1, "Revenue": 7927790, "CPL": 2004.874458874459, "Cost_per_deal": 463126.0, "ROMI": 16.117998125780026}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 528401, "Leads": 178, "Qualified_leads": 108, "Meetings": 55, "Reservations": 21, "Deals": 7, "Revenue": 48986812, "CPL": 2968.544943820225, "Cost_per_deal": 75485.85714285714, "ROMI": 91.70764438371616}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 565803, "Leads": 210, "Qualified_leads": 130, "Meetings": 65, "Reservations": 22, "Deals": 7, "Revenue": 85196398, "CPL": 2694.3, "Cost_per_deal": 80829.0, "ROMI": 149.57608036719495}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 84937, "Leads": 76, "Qualified_leads": 45, "Meetings": 22, "Reservations": 9, "Deals": 4, "Revenue": 35836120, "CPL": 1117.592105263158, "Cost_per_deal": 21234.25, "ROMI": 420.9141245864582}, {"Month": "2025-12", "Project": "Новая жизнь", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 391289, "Leads": 130, "Qualified_leads": 64, "Meetings": 22, "Reservations": 6, "Deals": 1, "Revenue": 8952553, "CPL": 3009.9153846153845, "Cost_per_deal": 391289.0, "ROMI": 21.879643946034772}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 696897, "Leads": 263, "Qualified_leads": 132, "Meetings": 53, "Reservations": 14, "Deals": 4, "Revenue": 44084144, "CPL": 2649.7984790874525, "Cost_per_deal": 174224.25, "ROMI": 62.25776118996064}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Яндекс.Директ", "Campaign": "Поиск — студии", "Spend": 778834, "Leads": 321, "Qualified_leads": 165, "Meetings": 68, "Reservations": 18, "Deals": 6, "Revenue": 47186196, "CPL": 2426.2741433021806, "Cost_per_deal": 129805.66666666667, "ROMI": 59.58569091744839}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "SEO", "Campaign": "Блог недвижимости", "Spend": 336366, "Leads": 181, "Qualified_leads": 78, "Meetings": 25, "Reservations": 6, "Deals": 1, "Revenue": 8440692, "CPL": 1858.375690607735, "Cost_per_deal": 336366.0, "ROMI": 24.09377285456913}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "VK — лид-формы", "Spend": 421122, "Leads": 192, "Qualified_leads": 75, "Meetings": 22, "Reservations": 5, "Deals": 1, "Revenue": 10403964, "CPL": 2193.34375, "Cost_per_deal": 421122.0, "ROMI": 23.705344294527478}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Соцсети", "Campaign": "Таргет — видео", "Spend": 496978, "Leads": 257, "Qualified_leads": 109, "Meetings": 34, "Reservations": 9, "Deals": 2, "Revenue": 21689704, "CPL": 1933.7665369649806, "Cost_per_deal": 248489.0, "ROMI": 42.643187424795464}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Агентская акция", "Spend": 553778, "Leads": 178, "Qualified_leads": 109, "Meetings": 57, "Reservations": 23, "Deals": 9, "Revenue": 107359110, "CPL": 3111.112359550562, "Cost_per_deal": 61530.88888888889, "ROMI": 192.86669387371836}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Агентства", "Campaign": "Партнеры — база", "Spend": 656650, "Leads": 232, "Qualified_leads": 146, "Meetings": 66, "Reservations": 25, "Deals": 8, "Revenue": 70750736, "CPL": 2830.387931034483, "Cost_per_deal": 82081.25, "ROMI": 106.74497220741644}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Рекомендации", "Campaign": "Повторные обращения", "Spend": 115079, "Leads": 80, "Qualified_leads": 55, "Meetings": 30, "Reservations": 13, "Deals": 5, "Revenue": 46474580, "CPL": 1438.4875, "Cost_per_deal": 23015.8, "ROMI": 402.84935566002486}, {"Month": "2025-12", "Project": "Речной квартал", "Channel": "Оффлайн", "Campaign": "Реклама у метро", "Spend": 359194, "Leads": 96, "Qualified_leads": 50, "Meetings": 18, "Reservations": 5, "Deals": 1, "Revenue": 8611520, "CPL": 3741.6041666666665, "Cost_per_deal": 359194.0, "ROMI": 22.97456527670284}];
+const pageSize = 20;
+let currentPage = 0;
+
+const COLORS = {
+    teal: "#18a999",
+    navy: "#253b50",
+    blue: "#6d91c7",
+    orange: "#e69b52",
+    red: "#e26d6d",
+    gray: "#9aa5b1"
+};
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+}
+
+function unique(field) {
+    return [...new Set(rows.map(row => row[field]).filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b), "ru"));
+}
+
+function fillSelect(id, values) {
+    document.getElementById(id).innerHTML = values
+        .map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+        .join("");
+}
+
+function selected(id) {
+    return [...document.getElementById(id).selectedOptions]
+        .map(option => option.value);
+}
+
+function money(value) {
+    return new Intl.NumberFormat("ru-RU", {
+        maximumFractionDigits: 0
+    }).format(Number(value) || 0) + " ₽";
+}
+
+function percent(value) {
+    return (Number(value) * 100).toFixed(1) + "%";
+}
+
+function safeDivide(a, b) {
+    b = Number(b) || 0;
+    return b === 0 ? 0 : Number(a) / b;
+}
+
+function filteredRows() {
+    const months = selected("monthFilter");
+    const projects = selected("projectFilter");
+    const channels = selected("channelFilter");
+
+    return rows.filter(row =>
+        (!months.length || months.includes(row.Month)) &&
+        (!projects.length || projects.includes(row.Project)) &&
+        (!channels.length || channels.includes(row.Channel))
+    );
+}
+
+function sum(field, data) {
+    return data.reduce((total, row) => total + (Number(row[field]) || 0), 0);
+}
+
+function chartLayout(title) {
+    return {
+        title: {
+            text: title,
+            x: 0.03,
+            font: {size: 14, color: COLORS.ink}
+        },
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        margin: {l: 50, r: 20, t: 45, b: 45},
+        font: {family: "Arial", size: 11, color: "#536170"},
+        showlegend: false
+    };
+}
+
+function renderKPIs(data) {
+    const spend = sum("Spend", data);
+    const leads = sum("Leads", data);
+    const qualified = sum("Qualified_leads", data);
+    const deals = sum("Deals", data);
+    const revenue = sum("Revenue", data);
+
+    const cpl = safeDivide(spend, leads);
+    const romi = safeDivide(revenue - spend, spend);
+    const conversion = safeDivide(deals, leads);
+
+    const kpis = [
+        ["Расходы", money(spend), COLORS.navy],
+        ["Обращения", leads.toLocaleString("ru-RU"), COLORS.blue],
+        ["Квалифицированные", qualified.toLocaleString("ru-RU"), COLORS.orange],
+        ["Сделки", deals.toLocaleString("ru-RU"), COLORS.teal],
+        ["CPL", money(cpl), COLORS.red],
+        ["ROMI", percent(romi), romi >= 0 ? COLORS.teal : COLORS.red],
+    ];
+
+    document.getElementById("kpis").innerHTML = kpis.map(kpi => `
+        <div class="card kpi">
+            <div class="kpi-label">${kpi[0]}</div>
+            <div class="kpi-value" style="color:${kpi[2]}">${kpi[1]}</div>
+        </div>
+    `).join("");
+}
+
+function renderCharts(data) {
+    // Динамика по месяцам
+    const monthMap = {};
+
+    data.forEach(row => {
+        if (!monthMap[row.Month]) {
+            monthMap[row.Month] = {spend: 0, leads: 0};
+        }
+
+        monthMap[row.Month].spend += Number(row.Spend) || 0;
+        monthMap[row.Month].leads += Number(row.Leads) || 0;
+    });
+
+    const months = Object.keys(monthMap).sort();
+
+    Plotly.react("trendChart", [
+        {
+            x: months,
+            y: months.map(month => monthMap[month].spend),
+            type: "bar",
+            name: "Расходы",
+            marker: {color: COLORS.navy},
+            yaxis: "y"
+        },
+        {
+            x: months,
+            y: months.map(month => monthMap[month].leads),
+            type: "scatter",
+            mode: "lines+markers",
+            name: "Обращения",
+            line: {color: COLORS.teal, width: 3},
+            marker: {size: 7},
+            yaxis: "y2"
+        }
+    ], {
+        ...chartLayout("Динамика"),
+        showlegend: true,
+        legend: {orientation: "h", y: 1.12},
+        margin: {l: 55, r: 55, t: 45, b: 45},
+        yaxis: {
+            title: "Расходы",
+            gridcolor: "#edf0f3",
+            tickformat: "~s"
+        },
+        yaxis2: {
+            title: "Лиды",
+            overlaying: "y",
+            side: "right",
+            showgrid: false
+        },
+        xaxis: {tickangle: -25}
+    }, {
+        responsive: true,
+        displayModeBar: false
+    });
+
+    // Каналы
+    const channelMap = {};
+
+    data.forEach(row => {
+        if (!channelMap[row.Channel]) {
+            channelMap[row.Channel] = {leads: 0, deals: 0};
+        }
+
+        channelMap[row.Channel].leads += Number(row.Leads) || 0;
+        channelMap[row.Channel].deals += Number(row.Deals) || 0;
+    });
+
+    const channelNames = Object.keys(channelMap);
+
+    Plotly.react("channelChart", [
+        {
+            x: channelNames,
+            y: channelNames.map(name => channelMap[name].leads),
+            type: "bar",
+            name: "Обращения",
+            marker: {color: COLORS.blue}
+        },
+        {
+            x: channelNames,
+            y: channelNames.map(name => channelMap[name].deals),
+            type: "bar",
+            name: "Сделки",
+            marker: {color: COLORS.teal}
+        }
+    ], {
+        ...chartLayout("Каналы"),
+        showlegend: true,
+        legend: {orientation: "h", y: 1.12},
+        margin: {l: 45, r: 20, t: 45, b: 75},
+        xaxis: {tickangle: -25},
+        yaxis: {gridcolor: "#edf0f3"}
+    }, {
+        responsive: true,
+        displayModeBar: false
+    });
+
+    // Стоимость привлечения
+    const costMap = {};
+
+    data.forEach(row => {
+        if (!costMap[row.Channel]) {
+            costMap[row.Channel] = {spend: 0, leads: 0, deals: 0};
+        }
+
+        costMap[row.Channel].spend += Number(row.Spend) || 0;
+        costMap[row.Channel].leads += Number(row.Leads) || 0;
+        costMap[row.Channel].deals += Number(row.Deals) || 0;
+    });
+
+    const costNames = Object.keys(costMap).sort((a, b) => {
+        const cplA = safeDivide(costMap[a].spend, costMap[a].leads);
+        const cplB = safeDivide(costMap[b].spend, costMap[b].leads);
+        return cplA - cplB;
+    });
+
+    Plotly.react("costChart", [
+        {
+            x: costNames,
+            y: costNames.map(name =>
+                safeDivide(costMap[name].spend, costMap[name].leads)
+            ),
+            type: "bar",
+            name: "CPL",
+            marker: {color: COLORS.orange}
+        },
+        {
+            x: costNames,
+            y: costNames.map(name =>
+                safeDivide(costMap[name].spend, costMap[name].deals)
+            ),
+            type: "bar",
+            name: "Стоимость сделки",
+            marker: {color: COLORS.navy}
+        }
+    ], {
+        ...chartLayout("Стоимость"),
+        showlegend: true,
+        legend: {orientation: "h", y: 1.12},
+        margin: {l: 55, r: 20, t: 45, b: 75},
+        xaxis: {tickangle: -25},
+        yaxis: {gridcolor: "#edf0f3", tickformat: "~s"}
+    }, {
+        responsive: true,
+        displayModeBar: false
+    });
+
+    // Воронка
+    const funnel = [
+        ["Обращения", sum("Leads", data)],
+        ["Квалифицированные", sum("Qualified_leads", data)],
+        ["Встречи", sum("Meetings", data)],
+        ["Брони", sum("Reservations", data)],
+        ["Сделки", sum("Deals", data)],
+    ];
+
+    Plotly.react("funnelChart", [{
+        type: "funnel",
+        y: funnel.map(item => item[0]),
+        x: funnel.map(item => item[1]),
+        textinfo: "value+percent initial",
+        marker: {
+            color: [COLORS.blue, COLORS.teal, COLORS.orange, COLORS.red, COLORS.navy]
+        }
+    }], {
+        ...chartLayout("Воронка"),
+        margin: {l: 120, r: 30, t: 45, b: 25}
+    }, {
+        responsive: true,
+        displayModeBar: false
+    });
+
+    // ROMI
+    const romiMap = {};
+
+    data.forEach(row => {
+        if (!romiMap[row.Channel]) {
+            romiMap[row.Channel] = {spend: 0, revenue: 0};
+        }
+
+        romiMap[row.Channel].spend += Number(row.Spend) || 0;
+        romiMap[row.Channel].revenue += Number(row.Revenue) || 0;
+    });
+
+    const romiNames = Object.keys(romiMap).sort((a, b) => {
+        const romiA = safeDivide(
+            romiMap[a].revenue - romiMap[a].spend,
+            romiMap[a].spend
+        );
+        const romiB = safeDivide(
+            romiMap[b].revenue - romiMap[b].spend,
+            romiMap[b].spend
+        );
+        return romiA - romiB;
+    });
+
+    Plotly.react("romiChart", [{
+        x: romiNames.map(name =>
+            safeDivide(
+                romiMap[name].revenue - romiMap[name].spend,
+                romiMap[name].spend
+            ) * 100
+        ),
+        y: romiNames,
+        type: "bar",
+        orientation: "h",
+        marker: {color: COLORS.teal},
+        text: romiNames.map(name => {
+            const romi = safeDivide(
+                romiMap[name].revenue - romiMap[name].spend,
+                romiMap[name].spend
+            ) * 100;
+            return romi.toFixed(1) + "%";
+        }),
+        textposition: "outside"
+    }], {
+        ...chartLayout("ROMI"),
+        margin: {l: 120, r: 45, t: 45, b: 35},
+        xaxis: {gridcolor: "#edf0f3", title: "ROMI, %"},
+        yaxis: {showgrid: false}
+    }, {
+        responsive: true,
+        displayModeBar: false
+    });
+}
+
+function renderTable(data) {
+    const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+    currentPage = Math.min(currentPage, pageCount - 1);
+    currentPage = Math.max(0, currentPage);
+
+    const start = currentPage * pageSize;
+    const pageRows = data.slice(start, start + pageSize);
+
+    document.getElementById("dataTable").innerHTML =
+        pageRows.map(row => {
+            const index = rows.indexOf(row);
+
+            return `
+                <tr>
+                    <td><input value="${escapeHtml(row.Month)}"
+                        onchange="editRow(${index}, 'Month', this.value)"></td>
+                    <td><input value="${escapeHtml(row.Project)}"
+                        onchange="editRow(${index}, 'Project', this.value)"></td>
+                    <td><input value="${escapeHtml(row.Channel)}"
+                        onchange="editRow(${index}, 'Channel', this.value)"></td>
+                    <td><input value="${escapeHtml(row.Campaign)}"
+                        onchange="editRow(${index}, 'Campaign', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Spend) || 0}"
+                        onchange="editRow(${index}, 'Spend', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Leads) || 0}"
+                        onchange="editRow(${index}, 'Leads', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Qualified_leads) || 0}"
+                        onchange="editRow(${index}, 'Qualified_leads', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Meetings) || 0}"
+                        onchange="editRow(${index}, 'Meetings', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Reservations) || 0}"
+                        onchange="editRow(${index}, 'Reservations', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Deals) || 0}"
+                        onchange="editRow(${index}, 'Deals', this.value)"></td>
+                    <td><input type="number" value="${Number(row.Revenue) || 0}"
+                        onchange="editRow(${index}, 'Revenue', this.value)"></td>
+                </tr>
+            `;
+        }).join("");
+
+    document.getElementById("pageLabel").textContent =
+        `Страница ${currentPage + 1} из ${pageCount} · записей: ${data.length}`;
+}
+
+function renderAll() {
+    const data = filteredRows();
+    renderKPIs(data);
+    renderCharts(data);
+    renderTable(data);
+}
+
+function editRow(index, field, value) {
+    if ([
+        "Spend",
+        "Leads",
+        "Qualified_leads",
+        "Meetings",
+        "Reservations",
+        "Deals",
+        "Revenue"
+    ].includes(field)) {
+        const number = Number(value);
+        rows[index][field] = Number.isFinite(number) ? number : 0;
+    } else {
+        rows[index][field] = value;
+    }
+
+    renderAll();
+}
+
+function addRow() {
+    rows.push({
+        Month: "2025-12",
+        Project: "Северный парк",
+        Channel: "Яндекс.Директ",
+        Campaign: "Новая кампания",
+        Spend: 500000,
+        Leads: 100,
+        Qualified_leads: 50,
+        Meetings: 20,
+        Reservations: 8,
+        Deals: 3,
+        Revenue: 27000000
+    });
+
+    currentPage = Math.floor((rows.length - 1) / pageSize);
+    renderAll();
+}
+
+function changePage(delta) {
+    currentPage += delta;
+    renderAll();
+}
+
+function resetFilters() {
+    ["monthFilter", "projectFilter", "channelFilter"].forEach(id => {
+        document.getElementById(id).selectedIndex = -1;
+    });
+
+    currentPage = 0;
+    renderAll();
+}
+
+function downloadCSV() {
+    const headers = [
+        "Month",
+        "Project",
+        "Channel",
+        "Campaign",
+        "Spend",
+        "Leads",
+        "Qualified_leads",
+        "Meetings",
+        "Reservations",
+        "Deals",
+        "Revenue"
+    ];
+
+    const csv = [
+        headers.join(";"),
+        ...rows.map(row =>
+            headers.map(header =>
+                '"' + String(row[header] ?? "").replaceAll('"', '""') + '"'
+            ).join(";")
+        )
+    ].join("\n");
+
+    const blob = new Blob(
+        ["\uFEFF" + csv],
+        {type: "text/csv;charset=utf-8;"}
+    );
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "real_estate_marketing_updated.csv";
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+}
+
+fillSelect("monthFilter", unique("Month"));
+fillSelect("projectFilter", unique("Project"));
+fillSelect("channelFilter", unique("Channel"));
+
+["monthFilter", "projectFilter", "channelFilter"].forEach(id => {
+    document.getElementById(id).addEventListener("change", () => {
+        currentPage = 0;
+        renderAll();
+    });
+});
+
+renderAll();
+</script>
+
+</body>
+</html>
